@@ -1,10 +1,28 @@
-import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import NotFound from "@/pages/not-found";
+import PurchaseAgreement from "@/pages/purchase-agreement";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { Route, Routes } from "react-router";
+import { queryClient } from "./lib/queryClient";
+
+function Router() {
+  return (
+    <Routes>
+      <Route path="/" element={<PurchaseAgreement />} />
+      <Route element={<NotFound />} />
+    </Routes>
+  );
+}
 
 function App() {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center">
-      <Button>Click me</Button>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Router />
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
 
