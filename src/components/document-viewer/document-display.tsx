@@ -14,12 +14,14 @@ import {
 import { useState } from "react";
 
 interface DocumentDisplayProps {
+  id: string;
   document?: Document;
   documents: Document[];
   onDocumentSelect: (id: number) => void;
 }
 
 export default function DocumentDisplay({
+  id,
   document,
   documents,
   onDocumentSelect,
@@ -73,9 +75,9 @@ export default function DocumentDisplay({
 
   if (!document) {
     return (
-      <section className="flex-1 bg-gray-100 p-6 flex items-center justify-center">
+      <section className="flex flex-1 items-center justify-center bg-gray-100 p-6">
         <div className="text-center">
-          <p className="text-gray-500 mb-4">No document selected</p>
+          <p className="mb-4 text-gray-500">No document selected</p>
           <p className="text-sm text-gray-400">
             Select a document from the sidebar to view it
           </p>
@@ -89,18 +91,18 @@ export default function DocumentDisplay({
   const canGoNext = currentIndex < documents.length - 1;
 
   return (
-    <section className="flex-1 bg-gray-100 p-6 flex flex-col">
+    <section className="flex flex-1 flex-col bg-gray-100 p-6">
       {/* Document Info Header */}
       <div className="mb-6">
         <h3 className="text-xl font-semibold text-gray-900">{document.name}</h3>
-        <p className="text-sm text-gray-600 mt-1">
+        <p className="mt-1 text-sm text-gray-600">
           Weaver Eco Home Inc. • Last modified 2 hours ago
         </p>
       </div>
 
       {/* Single Image Display */}
-      <div className="flex-1 flex items-center justify-center">
-        <Card className="max-w-4xl w-full bg-white shadow-lg overflow-hidden">
+      <div className="flex flex-1 items-center justify-center">
+        <Card className="w-full max-w-4xl overflow-hidden bg-white shadow-lg">
           <div className="relative">
             <AnimatePresence mode="wait">
               {imageLoading && (
@@ -109,10 +111,10 @@ export default function DocumentDisplay({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 flex items-center justify-center bg-gray-100 h-96"
+                  className="absolute inset-0 flex h-96 items-center justify-center bg-gray-100"
                 >
                   <div className="text-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-2" />
+                    <Loader2 className="mx-auto mb-2 h-8 w-8 animate-spin text-blue-600" />
                     <p className="text-gray-600">Loading document...</p>
                   </div>
                 </motion.div>
@@ -124,14 +126,14 @@ export default function DocumentDisplay({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 flex items-center justify-center bg-gray-100 h-96"
+                  className="absolute inset-0 flex h-96 items-center justify-center bg-gray-100"
                 >
                   <div className="text-center">
-                    <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">
+                    <AlertTriangle className="mx-auto mb-3 h-12 w-12 text-gray-400" />
+                    <h4 className="mb-2 text-lg font-medium text-gray-900">
                       Unable to load document
                     </h4>
-                    <p className="text-gray-600 mb-4">
+                    <p className="mb-4 text-gray-600">
                       The document could not be displayed. Please try refreshing
                       the page.
                     </p>
@@ -139,7 +141,7 @@ export default function DocumentDisplay({
                       onClick={() => window.location.reload()}
                       variant="outline"
                     >
-                      <ChevronLeft className="h-4 w-4 mr-2" />
+                      <ChevronLeft className="mr-2 h-4 w-4" />
                       Retry
                     </Button>
                   </div>
@@ -147,22 +149,34 @@ export default function DocumentDisplay({
               )}
 
               {!imageLoading && !imageError && (
-                <motion.img
-                  key={document.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  src={document.imageUrl}
-                  alt={document.name}
-                  className="w-full h-auto max-h-[800px] object-contain"
-                  style={{
-                    transform: `scale(${zoomLevel / 100})`,
-                    transformOrigin: "center center",
+                // <motion.img
+                //   key={document.id}
+                //   initial={{ opacity: 0, scale: 0.95 }}
+                //   animate={{ opacity: 1, scale: 1 }}
+                //   exit={{ opacity: 0, scale: 0.95 }}
+                //   transition={{ duration: 0.2 }}
+                //   src={document.imageUrl}
+                //   alt={document.name}
+                //   className="h-auto max-h-[800px] w-full object-contain"
+                //   style={{
+                //     transform: `scale(${zoomLevel / 100})`,
+                //     transformOrigin: "center center",
+                //   }}
+                //   onLoad={handleImageLoad}
+                //   onError={handleImageError}
+                //   onLoadStart={handleImageLoadStart}
+                // />
+
+                <iframe
+                  // ref={frameRef}
+                  src={`https://workdrive.zohoexternal.com/embed/${id}?toolbar=false&appearance=light&themecolor=green`}
+                  allowFullScreen
+                  onLoad={() => {
+                    // setLoaded(true);
+                    // onLoad?.();
                   }}
-                  onLoad={handleImageLoad}
-                  onError={handleImageError}
-                  onLoadStart={handleImageLoadStart}
+                  width="100%"
+                  height={1000}
                 />
               )}
             </AnimatePresence>
@@ -179,7 +193,7 @@ export default function DocumentDisplay({
             onClick={handlePrevious}
             disabled={!canGoPrevious}
           >
-            <ChevronLeft className="h-4 w-4 mr-2" />
+            <ChevronLeft className="mr-2 h-4 w-4" />
             Previous
           </Button>
           <span className="text-sm text-gray-600">
@@ -192,7 +206,7 @@ export default function DocumentDisplay({
             disabled={!canGoNext}
           >
             Next
-            <ChevronRight className="h-4 w-4 ml-2" />
+            <ChevronRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
 
@@ -206,7 +220,7 @@ export default function DocumentDisplay({
           >
             <ZoomOut className="h-4 w-4" />
           </Button>
-          <span className="text-sm text-gray-600 min-w-[50px] text-center">
+          <span className="min-w-[50px] text-center text-sm text-gray-600">
             {zoomLevel}%
           </span>
           <Button
