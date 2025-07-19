@@ -10,16 +10,17 @@ import { useZoho } from "@/providers/zoho-provider";
 import { executeFunction, getRecord, getRelatedRecords } from "@/repo";
 import { useDocumentsStore } from "@/store/useDocumentsStore";
 import type { Dealer } from "@/types/dealer";
-import type { Document, DocumentType } from "@/types/document";
+import type { Document, DocumentName } from "@/types/document";
 import type { Lead } from "@/types/lead";
 import type { SalesOrder } from "@/types/sales-order";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { compact } from "lodash";
 import { AlertCircleIcon, Loader2Icon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 function getDocumentList(salesOrder?: SalesOrder) {
-  let documents: DocumentType[] = [];
+  let documents: DocumentName[] = [];
 
   salesOrder?.Rebate_Types;
 
@@ -99,8 +100,8 @@ export default function PurchaseAgreement() {
   const [requestId, setRequestId] = useState<string | null>();
   const [signUrl, setSignUrl] = useState<string | null>();
 
-  const [selectedDocumentType, setSelectedDocumentType] =
-    useState<DocumentType | null>();
+  const [selectedDocumentName, setSelectedDocumentName] =
+    useState<DocumentName | null>();
   const [isRecallModalOpen, setIsRecallModalOpen] = useState(false);
   const [isDocumentsModalOpen, setIsDocumentsModalOpen] = useState(false);
   const [isSendForSigningModalOpen, setIsSendForSigningModalOpen] =
@@ -111,10 +112,6 @@ export default function PurchaseAgreement() {
 
   const topElementRef = useRef<HTMLDivElement>(null);
 
-  const selectedDocument = documents?.find(
-    (doc) => doc.documentType === selectedDocumentType,
-  );
-
   const isLoading =
     leadDetails.isLoading ||
     salesOrderDetails.isLoading ||
@@ -123,47 +120,54 @@ export default function PurchaseAgreement() {
     leadDetails.error || salesOrderDetails.error || agreementDocument.error;
 
   useEffect(() => {
+    if (agreementDocument.data) {
+      const documents = getDocumentList(salesOrderDetails.data);
+      setDocuments(["Agreement", ...documents]);
+      setSelectedDocumentName("Agreement");
+    }
+  }, [agreementDocument.data]);
+
+  const documentTemplates: Document[] = useMemo(() => {
+    const thumbnails: Record<Dealer, string> = {
+      "Canadian Choice Home Services": "/cchs.png",
+      "Canadian Eco Home": "/weh.png",
+      "Weaver Eco Home": "/weh.png",
+    };
+
     if (
       agreementDocument.data &&
       salesOrderDetails.data?.Dealer &&
       salesOrderDetails.data?.Lead_Quote
     ) {
-      const thumbnails: Record<Dealer, string> = {
-        "Canadian Choice Home Services": "/cchs.png",
-        "Canadian Eco Home": "/weh.png",
-        "Weaver Eco Home": "/weh.png",
-      };
-
-      let documents: Document[] = [
-        {
-          id: agreementDocument.data,
-          documentType: "Agreement",
-          thumbnail: salesOrderDetails.data?.Dealer
-            ? thumbnails[salesOrderDetails.data?.Dealer]
-            : null,
-        },
-      ];
-
-      const documentNames = getDocumentList(salesOrderDetails.data);
-
-      let templates = getDocumentTemplates(
-        salesOrderDetails.data.Dealer,
-        salesOrderDetails.data.id,
-        salesOrderDetails.data.Lead_Quote.id,
+      let allTemplates = getDocumentTemplates(
+        salesOrderDetails.data?.Dealer,
+        salesOrderDetails.data?.id,
+        salesOrderDetails.data?.Lead_Quote?.id,
       );
 
-      for (const documentType of documentNames) {
-        const template = templates.find((v) => v.documentType == documentType);
-
-        if (template && template.templateName) {
-          documents = [...documents, template];
+      const templates = documents?.map((doc) => {
+        if (doc === "Agreement") {
+          return {
+            id: agreementDocument.data,
+            name: "Agreement",
+            thumbnail: salesOrderDetails.data?.Dealer
+              ? thumbnails[salesOrderDetails.data?.Dealer]
+              : null,
+          } as Document;
         }
-      }
+        const template = allTemplates.find((v) => v.name == doc);
+        if (template?.templateName) return template;
+        return null;
+      });
 
-      setDocuments(documents);
-      setSelectedDocumentType("Agreement");
+      return compact(templates);
     }
-  }, [agreementDocument.data]);
+    return [];
+  }, [documents]);
+
+  const selectedDocument = documentTemplates?.find(
+    (v) => v.name === selectedDocumentName,
+  );
 
   useEffect(() => {
     setRequestId(salesOrderDetails.data?.Sign_Document_ID);
@@ -174,7 +178,7 @@ export default function PurchaseAgreement() {
     if (topElementRef.current) {
       topElementRef.current?.scrollIntoView();
     }
-  }, [selectedDocumentType]);
+  }, [selectedDocumentName]);
 
   if (isLoading) {
     return (
@@ -213,24 +217,25 @@ export default function PurchaseAgreement() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex min-h-screen flex-col justify-start bg-gray-50"
+      className="flex min-h-screen flex-col bg-gray-50"
     >
       <div ref={topElementRef} />
       <TopActionBar
-        selectedDocument={selectedDocument}
         onRecallClick={() => setIsRecallModalOpen(true)}
         onAddDocumentsClick={() => setIsDocumentsModalOpen(true)}
         onSendForSigningClick={() => setIsSendForSigningModalOpen(true)}
       />
 
-      <main className="flex flex-1">
+      <main className="flex flex-1 items-start">
         <ThumbnailSidebar
-          documents={documents || []}
-          selectedDocumentType={selectedDocumentType}
-          onDocumentSelect={setSelectedDocumentType}
+          documents={documentTemplates || []}
+          selectedDocumentName={selectedDocumentName}
+          onDocumentSelect={setSelectedDocumentName}
         />
 
-        <DocumentDisplay document={selectedDocument} />
+        <div className="sticky top-16 flex-1">
+          <DocumentDisplay document={selectedDocument} />
+        </div>
       </main>
 
       <RecallModal
@@ -242,6 +247,7 @@ export default function PurchaseAgreement() {
       <DocumentsModal
         isOpen={isDocumentsModalOpen}
         onClose={() => setIsDocumentsModalOpen(false)}
+        dealer={salesOrderDetails.data?.Dealer}
       />
 
       <SendForSigningModal

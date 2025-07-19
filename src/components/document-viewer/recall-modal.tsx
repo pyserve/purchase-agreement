@@ -8,11 +8,11 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface RecallModalProps {
   isOpen: boolean;
@@ -26,15 +26,13 @@ export default function RecallModal({
   requestId,
 }: RecallModalProps) {
   const [reason, setReason] = useState("");
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const recallMutation = useMutation({
     mutationFn: (data: { requestId: string; reason: string }) =>
       apiRequest("POST", "/api/recall-requests", data),
     onSuccess: () => {
-      toast({
-        title: "Document Recalled",
+      toast.success("Document Recalled", {
         description:
           "The document has been recalled successfully. All parties have been notified.",
       });
@@ -43,10 +41,8 @@ export default function RecallModal({
       queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
     },
     onError: () => {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "Failed to recall document. Please try again.",
-        variant: "destructive",
       });
     },
   });
@@ -54,10 +50,8 @@ export default function RecallModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!reason.trim()) {
-      toast({
-        title: "Reason Required",
+      toast("Reason Required", {
         description: "Please provide a reason for recalling this document.",
-        variant: "destructive",
       });
       return;
     }

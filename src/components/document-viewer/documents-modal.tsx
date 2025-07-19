@@ -7,134 +7,119 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/api";
-import type { Document } from "@/types/document";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getDocumentTemplates } from "@/constants/documents";
+import { useDocumentsStore } from "@/store/useDocumentsStore";
+import type { Dealer } from "@/types/dealer";
+import {
+  DOCUMENT_LIST,
+  type Document,
+  type DocumentName,
+} from "@/types/document";
 import { motion } from "framer-motion";
-import { FileText, X } from "lucide-react";
-import { useState } from "react";
+import { AlertTriangleIcon, FileText, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 interface DocumentsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  dealer?: Dealer;
 }
 
 export default function DocumentsModal({
   isOpen,
   onClose,
+  dealer,
 }: DocumentsModalProps) {
-  const [selectedDocuments, setSelectedDocuments] = useState<number[]>([]);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const { documents, setDocuments } = useDocumentsStore();
+  const [selectedDocuments, setSelectedDocuments] = useState<DocumentName[]>(
+    [],
+  );
 
-  const { data: availableDocuments0, isLoading } = useQuery<Document[]>({
-    queryKey: ["/api/available-documents"],
-    enabled: isOpen,
-  });
+  useEffect(() => {
+    // Reset selected documents when modal opens
+    if (isOpen) {
+      setSelectedDocuments(documents ?? []);
+    }
+  }, [isOpen]);
 
-  const availableDocuments = [
-    { id: 10, name: "voluptate" },
-    { id: 20, name: "voluptate" },
-  ];
+  const documentTemplates: Document[] = useMemo(() => {
+    if (dealer) {
+      const dealerDocuments = getDocumentTemplates(dealer);
 
-  const updateDocumentMutation = useMutation({
-    mutationFn: (data: { id: number; isSelected: boolean }) =>
-      apiRequest("PATCH", `/api/available-documents/${data.id}`, {
-        isSelected: data.isSelected,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/available-documents"] });
-    },
-  });
-
-  const handleDocumentToggle = (documentId: number, checked: boolean) => {
-    if (checked) {
-      setSelectedDocuments((prev) => [...prev, documentId]);
+      return DOCUMENT_LIST.map((v) => {
+        const template = dealerDocuments.find((d) => d.name === v);
+        if (template) {
+          return template;
+        } else {
+          return {
+            name: v,
+          };
+        }
+      });
     } else {
-      setSelectedDocuments((prev) => prev.filter((id) => id !== documentId));
+      return [];
+    }
+  }, [dealer, documents]);
+
+  const handleDocumentToggle = (name: DocumentName, checked: boolean) => {
+    if (checked) {
+      setSelectedDocuments((prev) => [...prev, name]);
+    } else {
+      setSelectedDocuments((prev) => prev.filter((v) => v !== name));
     }
   };
 
-  const handleAddSelected = async () => {
-    if (selectedDocuments.length === 0) {
-      toast({
-        title: "No Documents Selected",
-        description: "Please select at least one document to add.",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleSaveChanges = async () => {
+    setDocuments(selectedDocuments);
 
-    try {
-      // Update all selected documents
-      await Promise.all(
-        selectedDocuments.map((id) =>
-          updateDocumentMutation.mutateAsync({ id, isSelected: true })
-        )
-      );
+    toast.info("Changes Saved", {
+      description: `${selectedDocuments.length} document${
+        selectedDocuments.length === 1 ? "" : "s"
+      } added to the agreement package.`,
+    });
 
-      toast({
-        title: "Documents Added",
-        description: `${selectedDocuments.length} document${
-          selectedDocuments.length === 1 ? "" : "s"
-        } added to the agreement package.`,
-      });
-
-      setSelectedDocuments([]);
-      onClose();
-    } catch (error) {
-      console.log("🚀 ~ handleAddSelected ~ error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add documents. Please try again.",
-        variant: "destructive",
-      });
-    }
+    onClose();
   };
 
   const handleClose = () => {
-    setSelectedDocuments([]);
     onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent
-        className="sm:max-w-2xl max-h-[80vh] flex flex-col"
+        className="flex max-h-[80vh] flex-col sm:max-w-2xl"
         showCloseButton={false}
       >
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle>Add Documents</DialogTitle>
+            <DialogTitle>Documents</DialogTitle>
             <Button variant="ghost" size="sm" onClick={handleClose}>
               <X className="h-4 w-4" />
             </Button>
           </div>
           <DialogDescription>
-            Select additional documents to include in this agreement package.
+            Select documents to be included in this agreement package.
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto py-4">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {availableDocuments?.map((document, index) => (
+          <div className="space-y-3">
+            {documentTemplates
+              ?.filter((document) => document.name)
+              ?.map((document, index) => (
                 <motion.div
-                  key={document.id}
+                  key={document.name}
                   // initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <label className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                  <label className="flex cursor-pointer items-center rounded-lg border border-gray-200 p-3 transition-colors duration-200 hover:bg-gray-50">
                     <Checkbox
-                      checked={selectedDocuments.includes(document.id)}
+                      checked={selectedDocuments.includes(document.name!)}
                       onCheckedChange={(checked) =>
-                        handleDocumentToggle(document.id, checked as boolean)
+                        handleDocumentToggle(document.name!, checked as boolean)
                       }
                       className="mr-3"
                     />
@@ -146,6 +131,14 @@ export default function DocumentsModal({
                             <p className="text-sm font-medium text-gray-900">
                               {document.name}
                             </p>
+
+                            {document.name != "Agreement" &&
+                              !document.templateName && (
+                                <div className="flex items-center gap-x-1 space-x-1 text-xs text-yellow-600">
+                                  <AlertTriangleIcon className="h-4 w-4" />
+                                  No template available for {dealer}
+                                </div>
+                              )}
                             <p className="text-xs text-gray-500">
                               {/* {document.description} • {document.pageCount} {document.pageCount === 1 ? 'page' : 'pages'} */}
                             </p>
@@ -159,34 +152,24 @@ export default function DocumentsModal({
                   </label>
                 </motion.div>
               ))}
-            </div>
-          )}
+          </div>
         </div>
 
         <div className="border-t pt-4">
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <p className="text-sm text-gray-600">
               {selectedDocuments.length} document
               {selectedDocuments.length === 1 ? "" : "s"} selected
             </p>
             <div className="flex space-x-3">
-              <Button
-                variant="outline"
-                onClick={handleClose}
-                disabled={updateDocumentMutation.isPending}
-              >
+              <Button variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
               <Button
-                onClick={handleAddSelected}
-                disabled={
-                  updateDocumentMutation.isPending ||
-                  selectedDocuments.length === 0
-                }
+                onClick={handleSaveChanges}
+                disabled={selectedDocuments.length === 0}
               >
-                {updateDocumentMutation.isPending
-                  ? "Adding..."
-                  : "Add Selected"}
+                Save Changes
               </Button>
             </div>
           </div>

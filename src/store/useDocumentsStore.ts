@@ -1,11 +1,12 @@
-import type { Document, DocumentType } from "@/types/document";
+import type { DocumentName } from "@/types/document";
 import { create } from "zustand";
 
 type DocumentsStore = {
-  documents: Document[] | null;
-  setDocuments: (docs: Document[]) => void;
-  addDocument: (doc: Document) => void;
-  removeDocument: (type: DocumentType) => void;
+  documents: DocumentName[] | null;
+  setDocuments: (docs: DocumentName[]) => void;
+  addDocument: (doc: DocumentName) => void;
+  addDocuments: (docs: DocumentName[]) => void;
+  removeDocument: (type: DocumentName) => void;
   clearDocuments: () => void;
 };
 
@@ -16,10 +17,14 @@ export const useDocumentsStore = create<DocumentsStore>((set) => ({
     set((state) => ({
       documents: state.documents ? [...state.documents, doc] : [doc],
     })),
-  removeDocument: (documentType) =>
+  addDocuments: (docs) =>
+    set((state) => ({
+      documents: state.documents ? [...state.documents, ...docs] : docs,
+    })),
+  removeDocument: (document) =>
     set((state) => ({
       documents: state.documents
-        ? state.documents.filter((d) => d.documentType !== documentType)
+        ? state.documents.filter((v) => v !== document)
         : null,
     })),
   clearDocuments: () => set({ documents: null }),
