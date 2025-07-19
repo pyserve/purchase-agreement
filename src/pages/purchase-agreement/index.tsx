@@ -136,10 +136,6 @@ export default function PurchaseAgreement() {
         salesOrderDetails.data?.id,
         salesOrderDetails.data?.Lead_Quote?.id,
       );
-      console.log(
-        "🚀 ~ constdocumentTemplates:Document[]=useMemo ~ allTemplates:",
-        allTemplates,
-      );
 
       return allTemplates.filter((v) => documents?.includes(v.name));
     }
