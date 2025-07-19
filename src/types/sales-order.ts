@@ -4,8 +4,8 @@
 //
 //   const salesOrder = Convert.toSalesOrder(json);
 
-import type { DocumentType } from "@/constants/documents";
 import type { Dealer } from "./dealer";
+import type { DocumentName } from "./document";
 
 export type SalesOrder = {
   Owner?: CreatedBy;
@@ -20,7 +20,7 @@ export type SalesOrder = {
   Status?: string;
   Monthly_Payment_After_Deferral?: null;
   $approval?: Approval;
-  Rebate_Types?: DocumentType[];
+  Rebate_Types?: DocumentName[];
   Created_Time: string;
   Payment_Method?: string;
   Pay_Full_Options?: null;
@@ -74,7 +74,7 @@ export type SalesOrder = {
   Warranty?: string;
   Term_Months?: string;
   Old_Equipment?: string;
-  Energy_Audit_Type?: DocumentType[];
+  Energy_Audit_Type?: DocumentName[];
   $editable?: boolean;
   Product_Details?: ProductDetail[];
   Eligible_Package_Discount?: null;

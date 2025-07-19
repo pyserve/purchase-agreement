@@ -7,12 +7,12 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
 import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Mail, MessageCircle, Phone, Send, Shield, User } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface SendForSigningModalProps {
   isOpen: boolean;
@@ -34,7 +34,6 @@ export default function SendForSigningModal({
   const customerName = "John Smith";
   const customerEmail = "john.smith@example.com";
   const customerPhone = "(555) 123-4567";
-  const { toast } = useToast();
 
   const sendForSigningMutation = useMutation({
     mutationFn: (data: {
@@ -45,17 +44,14 @@ export default function SendForSigningModal({
       deliveryMethod: "email" | "phone";
     }) => apiRequest("POST", "/api/send-for-signing", data),
     onSuccess: () => {
-      toast({
-        title: "Document Sent Successfully",
+      toast.info("Document Sent Successfully", {
         description: `${documentTitle} has been sent to ${customerName} for signing.`,
       });
       onClose();
     },
     onError: () => {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "Failed to send document for signing. Please try again.",
-        variant: "destructive",
       });
     },
   });
@@ -243,7 +239,7 @@ export default function SendForSigningModal({
                     Request security deposit
                   </label>
                   <p className="text-xs text-gray-500">
-                    Collect deposit before signing
+                    Turn off this option if security deposit is already paid
                   </p>
                 </div>
                 <Switch
@@ -288,7 +284,7 @@ export default function SendForSigningModal({
                 </>
               ) : (
                 <>
-                  <Send className="mr-2 h-4 w-4" />
+                  <Send className="h-4 w-4" />
                   Send for Signing
                 </>
               )}

@@ -1,20 +1,22 @@
 import { Card } from "@/components/ui/card";
-import type { Document, DocumentType } from "@/types/document";
+import type { Document, DocumentName } from "@/types/document";
 import { motion } from "framer-motion";
+import { AlertTriangleIcon } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface ThumbnailSidebarProps {
   documents: Document[];
-  selectedDocumentType?: string | null;
-  onDocumentSelect: (type?: DocumentType) => void;
+  selectedDocumentName?: DocumentName | null;
+  onDocumentSelect: (type?: DocumentName) => void;
 }
 
 export default function ThumbnailSidebar({
   documents,
-  selectedDocumentType,
+  selectedDocumentName,
   onDocumentSelect,
 }: ThumbnailSidebarProps) {
   return (
-    <aside className="sticky top-16 flex h-full w-32 flex-col border-r border-gray-200 bg-white md:w-48">
+    <aside className="sticky top-16 flex h-[calc(100vh-4em)] w-32 flex-col border-r border-gray-200 bg-white md:w-48">
       <div className="border-b border-gray-200 p-4">
         <h2 className="text-lg font-semibold text-gray-900">Documents</h2>
         <p className="text-sm text-gray-500">
@@ -26,25 +28,25 @@ export default function ThumbnailSidebar({
         <div className="space-y-3">
           {documents.map((document, index) => (
             <motion.div
-              key={document.id}
+              key={document.name}
               // initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
               <Card
                 className={`cursor-pointer rounded-md p-3 transition-all duration-200 hover:shadow-md ${
-                  selectedDocumentType === document.documentType
+                  selectedDocumentName === document.name
                     ? "bg-blue-50 ring-2 ring-blue-500"
                     : "hover:bg-gray-50"
                 }`}
-                onClick={() => onDocumentSelect(document.documentType)}
+                onClick={() => onDocumentSelect(document.name)}
               >
                 <div>
                   {document.thumbnail && (
                     <div className="mb-2 aspect-[8.5/11] overflow-hidden rounded bg-gray-100 shadow-sm">
                       <img
                         src={document.thumbnail}
-                        alt={document.documentType}
+                        alt={document.name}
                         className="h-full w-full object-cover transition-transform duration-300 hover:scale-100"
                         loading="lazy"
                       />
@@ -52,9 +54,20 @@ export default function ThumbnailSidebar({
                   )}
 
                   <div className="text-left">
-                    <p className="text-sm font-medium text-gray-900">
-                      {document.documentType}
-                    </p>
+                    <div className="grid grid-cols-[1fr_10px] items-center gap-x-1">
+                      <p className="text-sm font-medium text-gray-900">
+                        {document.name}
+                      </p>
+                      {!document.templateName && (
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <AlertTriangleIcon className="h-4 w-4 text-yellow-600" />
+                          </TooltipTrigger>
+                          <TooltipContent>No template available</TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+
                     <p className="text-xs text-gray-500">
                       {/* Page {document.pageNumber} of {document.totalPages} */}
                     </p>

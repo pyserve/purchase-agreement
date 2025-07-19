@@ -1,42 +1,33 @@
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
-import type { Document } from "@/types/document";
 import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { PenTool, Plus, RefreshCw, Send, Undo2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface TopActionBarProps {
-  selectedDocument?: Document;
   onRecallClick: () => void;
   onAddDocumentsClick: () => void;
   onSendForSigningClick: () => void;
 }
 
 export default function TopActionBar({
-  // selectedDocument,
   onRecallClick,
   onAddDocumentsClick,
   onSendForSigningClick,
 }: TopActionBarProps) {
-  const { toast } = useToast();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const startSigningMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/start-signing"),
     onSuccess: () => {
-      toast({
-        title: "Success",
+      toast.success("Success", {
         description: "Signing process started successfully",
       });
     },
     onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to start signing process",
-        variant: "destructive",
-      });
+      toast("Error", { description: "Failed to start signing process" });
     },
   });
 

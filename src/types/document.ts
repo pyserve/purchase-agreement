@@ -1,4 +1,4 @@
-const DocumentList = [
+export const DOCUMENT_LIST = [
   "Agreement",
   "Warranty",
   "O.E.R.P",
@@ -12,14 +12,14 @@ const DocumentList = [
   "HVAC Equipment Acknowledgement Form",
 ] as const;
 
-export type DocumentType = (typeof DocumentList)[number];
+export type DocumentName = (typeof DOCUMENT_LIST)[number];
 
 export type Document = {
   id?: string;
+  name: DocumentName;
   description?: string | null;
   thumbnail?: string | null;
-  documentType?: DocumentType;
-  module?: string;
-  recordId?: string;
+  module?: string | null;
+  recordId?: string | null;
   templateName?: string | null;
 };

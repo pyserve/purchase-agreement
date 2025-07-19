@@ -8,15 +8,21 @@ import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 
-export default function DocumentDisplay({ document }: { document?: Document }) {
+export default function DocumentDisplay({
+  agreementDocument,
+  document,
+}: {
+  agreementDocument?: string;
+  document?: Document;
+}) {
   const { dataProvider } = useZoho();
 
-  const frameRef = useRef<HTMLIFrameElement>(null);
+  const containerRef = useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const estimatedHeight = useMemo(() => {
     if (isLoaded) {
-      const width = Number(frameRef.current?.clientWidth ?? 0);
+      const width = Number(containerRef.current?.clientWidth ?? 0);
       return width * 1.414 * 10;
     }
     return 600;
@@ -24,9 +30,13 @@ export default function DocumentDisplay({ document }: { document?: Document }) {
 
   const documentDetails = useQuery({
     enabled: !!document,
-    queryKey: ["documentDetails", document?.documentType],
+    queryKey: ["documentDetails", document?.name],
     queryFn: async () => {
-      if (document?.id) return document.id;
+      if (document?.name == "Agreement") return agreementDocument;
+
+      if (!document?.templateName) {
+        throw new Error(`No ${document?.name} Template Available`);
+      }
 
       return await executeFunction({
         dataProvider,
@@ -56,12 +66,15 @@ export default function DocumentDisplay({ document }: { document?: Document }) {
   }
 
   return (
-    <section className="flex flex-1 flex-col bg-gray-100 p-6">
+    <section
+      className="flex min-h-[calc(100vh-4em)] flex-1 flex-col bg-gray-100 p-6"
+      ref={containerRef}
+    >
       {/* Single Image Display */}
       <div className="flex flex-1 justify-center">
         <Card className="w-full max-w-4xl overflow-hidden rounded-md bg-white p-0 shadow-lg">
           <div className="relative">
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="sync">
               {documentDetails.isFetching && (
                 <motion.div
                   key="loading"
@@ -105,7 +118,6 @@ export default function DocumentDisplay({ document }: { document?: Document }) {
 
               {documentDetails.data ? (
                 <motion.iframe
-                  ref={frameRef}
                   key={document.id}
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
