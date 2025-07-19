@@ -27,7 +27,7 @@ const ZohoContext = createContext<ZohoContextType>({
 });
 
 export const ZohoProvider = ({ children }: { children: ReactNode }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [module, setModule] = useState<ZohoModule>();
   const [dataProvider, setDataProvider] = useState<ZohoDataProvider>("api");
   const [id, setId] = useState<string>();
@@ -35,42 +35,46 @@ export const ZohoProvider = ({ children }: { children: ReactNode }) => {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    if (searchParams.get("module") && searchParams.get("id")) {
-      setModule(searchParams.get("module") as ZohoModule);
-      setId(searchParams.get("id") as string);
-    } else if (window.ZOHO) {
-      initZoho();
-    }
+    (async () => {
+      if (searchParams.get("module") && searchParams.get("id")) {
+        setModule(searchParams.get("module") as ZohoModule);
+        setId(searchParams.get("id") as string);
+      } else if (window.ZOHO) {
+        await initZoho();
+      }
+      setIsLoading(false);
+    })();
   }, []);
 
   const initZoho = async () => {
-    setIsLoading(true);
-    window.ZOHO?.embeddedApp.on(
-      "PageLoad",
-      (data: {
-        ButtonPosition: ZohoWidgetButtonPosition;
-        Entity: ZohoModule;
-        EntityId: string[] | string;
-      }) => {
-        console.log("🚀 ~ ZohoProvider ~ data:", data);
-        setModule(data.Entity);
-        setDataProvider("zoho");
+    return new Promise<void>((resolve) => {
+      window.ZOHO?.embeddedApp.on(
+        "PageLoad",
+        (data: {
+          ButtonPosition: ZohoWidgetButtonPosition;
+          Entity: ZohoModule;
+          EntityId: string[] | string;
+        }) => {
+          console.log("🚀 ~ ZohoProvider ~ data:", data);
+          setModule(data.Entity);
+          setDataProvider("zoho");
 
-        if (Array.isArray(data.EntityId)) {
-          setId(data.EntityId[0]);
-        } else {
-          setId(data.EntityId);
-        }
+          if (Array.isArray(data.EntityId)) {
+            setId(data.EntityId[0]);
+          } else {
+            setId(data.EntityId);
+          }
 
-        window.ZOHO?.CRM.UI.Resize({
-          height: screen.height,
-          width: screen.width / 4,
-        });
+          window.ZOHO?.CRM.UI.Resize({
+            height: screen.height,
+            width: screen.width,
+          });
 
-        setIsLoading(false);
-      }
-    );
-    window.ZOHO?.embeddedApp.init();
+          resolve();
+        },
+      );
+      window.ZOHO?.embeddedApp.init();
+    });
   };
 
   if (isLoading) {
@@ -79,9 +83,9 @@ export const ZohoProvider = ({ children }: { children: ReactNode }) => {
 
   if (!module || !id) {
     return (
-      <div className="bg-gray-100 min-h-screen grid place-items-center">
-        <div className="max-w-md bg-card text-card-foreground relative w-full rounded-lg border px-4 py-3 text-sm grid grid-cols gap-y-2 items-start">
-          <div className="flex flex-row items-center justify-center w-12 h-12  bg-orange-100 rounded-full mx-auto">
+      <div className="grid min-h-screen place-items-center bg-gray-100">
+        <div className="bg-card text-card-foreground grid-cols relative grid w-full max-w-md items-start gap-y-2 rounded-lg border px-4 py-3 text-sm">
+          <div className="mx-auto flex h-12 w-12 flex-row items-center justify-center rounded-full bg-orange-100">
             <AlertTriangleIcon className="h-6 w-6 text-orange-600" />
           </div>
 

@@ -17,20 +17,20 @@ import { useState } from "react";
 interface RecallModalProps {
   isOpen: boolean;
   onClose: () => void;
-  documentId: number;
+  requestId: string;
 }
 
 export default function RecallModal({
   isOpen,
   onClose,
-  documentId,
+  requestId,
 }: RecallModalProps) {
   const [reason, setReason] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const recallMutation = useMutation({
-    mutationFn: (data: { documentId: number; reason: string }) =>
+    mutationFn: (data: { requestId: string; reason: string }) =>
       apiRequest("POST", "/api/recall-requests", data),
     onSuccess: () => {
       toast({
@@ -61,7 +61,7 @@ export default function RecallModal({
       });
       return;
     }
-    recallMutation.mutate({ documentId, reason: reason.trim() });
+    recallMutation.mutate({ requestId, reason: reason.trim() });
   };
 
   const handleClose = () => {
@@ -73,7 +73,7 @@ export default function RecallModal({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
             <AlertTriangle className="h-6 w-6 text-red-600" />
           </div>
           <DialogTitle className="text-center">Recall Document</DialogTitle>

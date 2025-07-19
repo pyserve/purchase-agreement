@@ -1,24 +1,24 @@
 import { Card } from "@/components/ui/card";
-import type { Document } from "@/types/document";
+import type { Document, DocumentType } from "@/types/document";
 import { motion } from "framer-motion";
 
 interface ThumbnailSidebarProps {
   documents: Document[];
-  selectedDocumentId: number;
-  onDocumentSelect: (id: number) => void;
+  selectedDocumentType?: string | null;
+  onDocumentSelect: (type?: DocumentType) => void;
 }
 
 export default function ThumbnailSidebar({
   documents,
-  selectedDocumentId,
+  selectedDocumentType,
   onDocumentSelect,
 }: ThumbnailSidebarProps) {
   return (
-    <aside className="w-80 bg-white border-r border-gray-200 flex flex-col">
-      <div className="p-4 border-b border-gray-200">
+    <aside className="sticky top-16 flex h-full w-32 flex-col border-r border-gray-200 bg-white md:w-48">
+      <div className="border-b border-gray-200 p-4">
         <h2 className="text-lg font-semibold text-gray-900">Documents</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          {documents.length} {documents.length === 1 ? "page" : "pages"}
+        <p className="text-sm text-gray-500">
+          {documents.length} {documents.length === 1 ? "document" : "documents"}
         </p>
       </div>
 
@@ -27,30 +27,33 @@ export default function ThumbnailSidebar({
           {documents.map((document, index) => (
             <motion.div
               key={document.id}
-              initial={{ opacity: 0, y: 20 }}
+              // initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
               <Card
-                className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                  selectedDocumentId === document.id
-                    ? "ring-2 ring-blue-500 bg-blue-50"
+                className={`cursor-pointer rounded-md p-3 transition-all duration-200 hover:shadow-md ${
+                  selectedDocumentType === document.documentType
+                    ? "bg-blue-50 ring-2 ring-blue-500"
                     : "hover:bg-gray-50"
                 }`}
-                onClick={() => onDocumentSelect(document.id)}
+                onClick={() => onDocumentSelect(document.documentType)}
               >
-                <div className="p-3">
-                  <div className="aspect-[8.5/11] bg-gray-100 rounded shadow-sm overflow-hidden mb-2">
-                    <img
-                      src={document.imageUrl}
-                      alt={document.name}
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                      loading="lazy"
-                    />
-                  </div>
+                <div>
+                  {document.thumbnail && (
+                    <div className="mb-2 aspect-[8.5/11] overflow-hidden rounded bg-gray-100 shadow-sm">
+                      <img
+                        src={document.thumbnail}
+                        alt={document.documentType}
+                        className="h-full w-full object-cover transition-transform duration-300 hover:scale-100"
+                        loading="lazy"
+                      />
+                    </div>
+                  )}
+
                   <div className="text-left">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {document.name}
+                    <p className="text-sm font-medium text-gray-900">
+                      {document.documentType}
                     </p>
                     <p className="text-xs text-gray-500">
                       {/* Page {document.pageNumber} of {document.totalPages} */}
