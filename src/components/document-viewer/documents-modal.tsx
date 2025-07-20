@@ -17,7 +17,7 @@ import {
   type DocumentName,
 } from "@/types/document";
 import { motion } from "framer-motion";
-import { AlertTriangleIcon, FileText, X } from "lucide-react";
+import { AlertTriangleIcon, FileText } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -134,17 +134,10 @@ export default function DocumentsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent
-        className="flex max-h-[80vh] flex-col sm:max-w-2xl"
-        showCloseButton={false}
-      >
+      <DialogContent className="flex max-h-[80vh] flex-col sm:max-w-2xl">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle>Documents</DialogTitle>
-            <Button variant="ghost" size="sm" onClick={handleClose}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle>Documents</DialogTitle>
+
           <DialogDescription>
             Select documents to be included in this agreement package.
           </DialogDescription>

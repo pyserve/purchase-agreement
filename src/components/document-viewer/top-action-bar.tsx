@@ -1,45 +1,28 @@
 import { Button } from "@/components/ui/button";
-import { apiRequest } from "@/lib/api";
-import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { PenTool, Plus, RefreshCw, Send, Undo2 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 interface TopActionBarProps {
   onRecallClick: () => void;
   onAddDocumentsClick: () => void;
   onSendForSigningClick: () => void;
+  onSignNowClick: () => void;
 }
 
 export default function TopActionBar({
   onRecallClick,
   onAddDocumentsClick,
   onSendForSigningClick,
+  onSignNowClick,
 }: TopActionBarProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const startSigningMutation = useMutation({
-    mutationFn: () => apiRequest("POST", "/api/start-signing"),
-    onSuccess: () => {
-      toast.success("Success", {
-        description: "Signing process started successfully",
-      });
-    },
-    onError: () => {
-      toast("Error", { description: "Failed to start signing process" });
-    },
-  });
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
     setTimeout(() => {
       window.location.reload();
     }, 500);
-  };
-
-  const handleStartSigning = () => {
-    startSigningMutation.mutate();
   };
 
   return (
@@ -102,14 +85,11 @@ export default function TopActionBar({
           </Button>
 
           <Button
-            onClick={handleStartSigning}
-            disabled={startSigningMutation.isPending}
+            onClick={onSignNowClick}
             className="bg-green-600 text-white shadow-sm hover:bg-green-700"
           >
             <PenTool className="h-4 w-4" />
-            {startSigningMutation.isPending
-              ? "Starting..."
-              : "Start Signing Now"}
+            Start Signing Now
           </Button>
         </div>
       </div>

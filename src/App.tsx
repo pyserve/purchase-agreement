@@ -3,6 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import PurchaseAgreement from "@/pages/purchase-agreement";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { Toaster as HotToaster } from "react-hot-toast";
 import { Route, Routes } from "react-router";
 import { queryClient } from "./lib/queryClient";
 import { ZohoProvider } from "./providers/zoho-provider";
@@ -22,6 +23,7 @@ function App() {
       <ZohoProvider>
         <TooltipProvider>
           <Toaster />
+          <HotToaster />
           <Router />
         </TooltipProvider>
       </ZohoProvider>

@@ -15,11 +15,11 @@ export const DOCUMENT_LIST = [
 export type DocumentName = (typeof DOCUMENT_LIST)[number];
 
 export type Document = {
-  id?: string;
   name: DocumentName;
   description?: string | null;
   thumbnail?: string | null;
   module?: string | null;
   recordId?: string | null;
   templateName?: string | null;
+  agentSignRequired?: boolean;
 };

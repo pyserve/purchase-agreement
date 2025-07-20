@@ -42,3 +42,17 @@ export function executeFunction<T>({
 
   throw new Error(`Unsupported data provider: ${dataProvider}`);
 }
+
+export function invokeConnection<T>({
+  dataProvider,
+  params,
+}: {
+  dataProvider: ZohoDataProvider;
+  params: Parameters<typeof zohoRepo.invokeConnection>[0];
+}) {
+  if (dataProvider === "zoho") {
+    return zohoRepo.invokeConnection<T>(params);
+  }
+
+  throw new Error(`Unsupported data provider: ${dataProvider}`);
+}

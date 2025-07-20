@@ -35,7 +35,7 @@ export default function DocumentDisplay({
       if (document?.name == "Agreement") return agreementDocument;
 
       if (!document?.templateName) {
-        throw new Error(`No ${document?.name} Template Available`);
+        throw new Error(`${document?.name} Template Not Available`);
       }
 
       return await executeFunction({

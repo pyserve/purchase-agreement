@@ -1,13 +1,14 @@
+import ConfirmationModal from "@/components/document-viewer/confirmation-modal";
 import DocumentDisplay from "@/components/document-viewer/document-display";
 import DocumentsModal from "@/components/document-viewer/documents-modal";
 import RecallModal from "@/components/document-viewer/recall-modal";
-import SendForSigningModal from "@/components/document-viewer/send-for-signing-modal";
 import ThumbnailSidebar from "@/components/document-viewer/thumbnail-sidebar";
 import TopActionBar from "@/components/document-viewer/top-action-bar";
 import { AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getDocumentTemplates } from "@/constants/documents";
 import { useZoho } from "@/providers/zoho-provider";
 import { executeFunction, getRecord, getRelatedRecords } from "@/repo";
+import { useAgreementRequestStatus } from "@/repo/purchase-agreement/useAgreementRequestStatus";
 import { useDocumentsStore } from "@/store/useDocumentsStore";
 import type { Document, DocumentName } from "@/types/document";
 import type { Lead } from "@/types/lead";
@@ -19,8 +20,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 function getDocumentList(salesOrder?: SalesOrder) {
   let documents: DocumentName[] = [];
-
-  salesOrder?.Rebate_Types;
 
   if (salesOrder?.Warranty == "YES") {
     documents = [...documents, "Warranty"];
@@ -45,6 +44,21 @@ function getDocumentList(salesOrder?: SalesOrder) {
 
 export default function PurchaseAgreement() {
   const { module, id, dataProvider } = useZoho();
+
+  const [requestId, setRequestId] = useState<string | null>();
+  const [signUrl, setSignUrl] = useState<string | null>();
+
+  const [selectedDocumentName, setSelectedDocumentName] =
+    useState<DocumentName | null>();
+  const [isRecallModalOpen, setIsRecallModalOpen] = useState(false);
+  const [isDocumentsModalOpen, setIsDocumentsModalOpen] = useState(false);
+  const [isSendForSigningModalOpen, setIsSendForSigningModalOpen] =
+    useState(false);
+  const [isSignNowModalOpen, setIsSignNowModalOpen] = useState(false);
+
+  const { documents, setDocuments } = useDocumentsStore();
+
+  const topElementRef = useRef<HTMLDivElement>(null);
 
   const leadDetails = useQuery({
     queryKey: ["leadDetails", id],
@@ -95,20 +109,10 @@ export default function PurchaseAgreement() {
     },
   });
 
-  const [requestId, setRequestId] = useState<string | null>();
-  const [signUrl, setSignUrl] = useState<string | null>();
-
-  const [selectedDocumentName, setSelectedDocumentName] =
-    useState<DocumentName | null>();
-  const [isRecallModalOpen, setIsRecallModalOpen] = useState(false);
-  const [isDocumentsModalOpen, setIsDocumentsModalOpen] = useState(false);
-  const [isSendForSigningModalOpen, setIsSendForSigningModalOpen] =
-    useState(false);
-
-  const { documents, addDocument, removeDocument, setDocuments } =
-    useDocumentsStore();
-
-  const topElementRef = useRef<HTMLDivElement>(null);
+  const agreementStatus = useAgreementRequestStatus({
+    dataProvider,
+    requestId,
+  });
 
   const isLoading =
     leadDetails.isLoading ||
@@ -168,7 +172,7 @@ export default function PurchaseAgreement() {
     );
   }
 
-  if (error) {
+  if (error || !salesOrderDetails.data || !leadDetails.data) {
     return (
       <div className="grid min-h-screen place-items-center bg-gray-100">
         <div className="bg-card text-card-foreground grid-cols relative grid w-full max-w-md items-start gap-y-2 rounded-lg border px-4 py-3 text-sm">
@@ -181,7 +185,7 @@ export default function PurchaseAgreement() {
 
             <AlertDescription className="text-center">
               <div className="w-full text-center">
-                {error.message || "An error occurred while fetching details."}
+                {error?.message || "An error occurred while fetching details."}
               </div>
             </AlertDescription>
           </div>
@@ -201,6 +205,7 @@ export default function PurchaseAgreement() {
         onRecallClick={() => setIsRecallModalOpen(true)}
         onAddDocumentsClick={() => setIsDocumentsModalOpen(true)}
         onSendForSigningClick={() => setIsSendForSigningModalOpen(true)}
+        onSignNowClick={() => setIsSignNowModalOpen(true)}
       />
 
       <main className="flex flex-1 items-start">
@@ -230,9 +235,22 @@ export default function PurchaseAgreement() {
         dealer={salesOrderDetails.data?.Dealer}
       />
 
-      <SendForSigningModal
+      <ConfirmationModal
+        isEmbeddedSigning={false}
+        lead={leadDetails.data}
+        salesOrder={salesOrderDetails.data}
+        documentTemplates={documentTemplates}
         isOpen={isSendForSigningModalOpen}
         onClose={() => setIsSendForSigningModalOpen(false)}
+      />
+
+      <ConfirmationModal
+        isEmbeddedSigning={true}
+        lead={leadDetails.data}
+        salesOrder={salesOrderDetails.data}
+        documentTemplates={documentTemplates}
+        isOpen={isSignNowModalOpen}
+        onClose={() => setIsSignNowModalOpen(false)}
       />
     </motion.div>
   );

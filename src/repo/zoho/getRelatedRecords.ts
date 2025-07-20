@@ -22,7 +22,7 @@ export async function getRelatedRecords<T>({
   });
 
   if (res.data.length == 0) {
-    throw Error("Related Details not found");
+    throw Error("Details not found");
   }
 
   return res.data;

@@ -23,13 +23,12 @@ type ZohoContextType = {
 const ZohoContext = createContext<ZohoContextType>({
   module: "Leads",
   id: "",
-  dataProvider: "api",
+  dataProvider: "zoho",
 });
 
 export const ZohoProvider = ({ children }: { children: ReactNode }) => {
-  const [isLoading, setIsLoading] = useState(true);
   const [module, setModule] = useState<ZohoModule>();
-  const [dataProvider, setDataProvider] = useState<ZohoDataProvider>("api");
+  const [dataProvider, setDataProvider] = useState<ZohoDataProvider>();
   const [id, setId] = useState<string>();
 
   const [searchParams] = useSearchParams();
@@ -39,10 +38,10 @@ export const ZohoProvider = ({ children }: { children: ReactNode }) => {
       if (searchParams.get("module") && searchParams.get("id")) {
         setModule(searchParams.get("module") as ZohoModule);
         setId(searchParams.get("id") as string);
+        setDataProvider("api");
       } else if (window.ZOHO) {
         await initZoho();
       }
-      setIsLoading(false);
     })();
   }, []);
 
@@ -77,7 +76,7 @@ export const ZohoProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  if (isLoading) {
+  if (!dataProvider) {
     return <></>;
   }
 

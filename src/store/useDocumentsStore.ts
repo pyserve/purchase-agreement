@@ -8,10 +8,13 @@ type DocumentsStore = {
   addDocuments: (docs: DocumentName[]) => void;
   removeDocument: (type: DocumentName) => void;
   clearDocuments: () => void;
+  requestId?: string | null;
+  setRequestId: (requestId?: string) => void;
 };
 
 export const useDocumentsStore = create<DocumentsStore>((set) => ({
   documents: null,
+  requestId: null,
   setDocuments: (docs) => set({ documents: docs }),
   addDocument: (doc) =>
     set((state) => ({
@@ -28,4 +31,5 @@ export const useDocumentsStore = create<DocumentsStore>((set) => ({
         : null,
     })),
   clearDocuments: () => set({ documents: null }),
+  setRequestId: (requestId) => set({ requestId }),
 }));
