@@ -22,5 +22,5 @@ export async function invokeConnection<T>({
     throw Error(res.message);
   }
 
-  return res;
+  return res.details;
 }

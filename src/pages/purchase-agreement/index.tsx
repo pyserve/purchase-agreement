@@ -2,9 +2,11 @@ import ConfirmationModal from "@/components/document-viewer/confirmation-modal";
 import DocumentDisplay from "@/components/document-viewer/document-display";
 import DocumentsModal from "@/components/document-viewer/documents-modal";
 import RecallModal from "@/components/document-viewer/recall-modal";
+import SignedDocumentDisplay from "@/components/document-viewer/signed-document-display";
 import ThumbnailSidebar from "@/components/document-viewer/thumbnail-sidebar";
 import TopActionBar from "@/components/document-viewer/top-action-bar";
 import { AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { getDocumentTemplates } from "@/constants/documents";
 import { useZoho } from "@/providers/zoho-provider";
 import { executeFunction, getRecord, getRelatedRecords } from "@/repo";
@@ -45,9 +47,6 @@ function getDocumentList(salesOrder?: SalesOrder) {
 export default function PurchaseAgreement() {
   const { module, id, dataProvider } = useZoho();
 
-  const [requestId, setRequestId] = useState<string | null>();
-  const [signUrl, setSignUrl] = useState<string | null>();
-
   const [selectedDocumentName, setSelectedDocumentName] =
     useState<DocumentName | null>();
   const [isRecallModalOpen, setIsRecallModalOpen] = useState(false);
@@ -56,7 +55,8 @@ export default function PurchaseAgreement() {
     useState(false);
   const [isSignNowModalOpen, setIsSignNowModalOpen] = useState(false);
 
-  const { documents, setDocuments } = useDocumentsStore();
+  const { documents, setDocuments, requestId, setRequestId } =
+    useDocumentsStore();
 
   const topElementRef = useRef<HTMLDivElement>(null);
 
@@ -117,9 +117,14 @@ export default function PurchaseAgreement() {
   const isLoading =
     leadDetails.isLoading ||
     salesOrderDetails.isLoading ||
-    agreementDocument.isLoading;
+    agreementDocument.isLoading ||
+    agreementStatus.isLoading;
+
   const error =
-    leadDetails.error || salesOrderDetails.error || agreementDocument.error;
+    leadDetails.error ||
+    salesOrderDetails.error ||
+    agreementDocument.error ||
+    agreementStatus.error;
 
   useEffect(() => {
     if (agreementDocument.data) {
@@ -152,7 +157,8 @@ export default function PurchaseAgreement() {
 
   useEffect(() => {
     setRequestId(salesOrderDetails.data?.Sign_Document_ID);
-    setSignUrl(salesOrderDetails.data?.sign_url);
+    // setRequestId("284096000002083089");
+    // setRequestId("284096000002081537");
   }, [salesOrderDetails.data]);
 
   useEffect(() => {
@@ -189,6 +195,16 @@ export default function PurchaseAgreement() {
               </div>
             </AlertDescription>
           </div>
+
+          <div className="mx-auto mt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -202,6 +218,10 @@ export default function PurchaseAgreement() {
     >
       <div ref={topElementRef} />
       <TopActionBar
+        isSignedOrSigning={
+          agreementStatus.data?.request_status == "inprogress" ||
+          agreementStatus.data?.request_status == "completed"
+        }
         onRecallClick={() => setIsRecallModalOpen(true)}
         onAddDocumentsClick={() => setIsDocumentsModalOpen(true)}
         onSendForSigningClick={() => setIsSendForSigningModalOpen(true)}
@@ -209,18 +229,25 @@ export default function PurchaseAgreement() {
       />
 
       <main className="flex flex-1 items-start">
-        <ThumbnailSidebar
-          documents={documentTemplates || []}
-          selectedDocumentName={selectedDocumentName}
-          onDocumentSelect={setSelectedDocumentName}
-        />
+        {agreementStatus.data?.request_status == "inprogress" ||
+        agreementStatus.data?.request_status == "completed" ? (
+          <SignedDocumentDisplay />
+        ) : (
+          <>
+            <ThumbnailSidebar
+              documents={documentTemplates || []}
+              selectedDocumentName={selectedDocumentName}
+              onDocumentSelect={setSelectedDocumentName}
+            />
 
-        <div className="sticky top-16 flex-1">
-          <DocumentDisplay
-            agreementDocument={agreementDocument.data}
-            document={selectedDocument}
-          />
-        </div>
+            <div className="sticky top-16 flex-1">
+              <DocumentDisplay
+                agreementDocument={agreementDocument.data}
+                document={selectedDocument}
+              />
+            </div>
+          </>
+        )}
       </main>
 
       <RecallModal

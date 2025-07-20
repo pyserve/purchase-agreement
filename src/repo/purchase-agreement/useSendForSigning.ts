@@ -1,4 +1,3 @@
-import { sleep } from "@/lib/utils";
 import { executeFunction } from "@/repo";
 import type { Document } from "@/types/document";
 import type { ZohoDataProvider } from "@/types/zoho";
@@ -53,7 +52,6 @@ export function useSendForSigning({
       requestDeposit,
     }: SendForSigningParams) => {
       if (sendToPhone && !phoneNumber) throw Error("Phone Number is required");
-      await sleep(4000);
       const res = await executeFunction<SendForSigningResponse>({
         dataProvider,
         params: {

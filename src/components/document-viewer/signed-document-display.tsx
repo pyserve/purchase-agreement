@@ -1,0 +1,127 @@
+import { Card } from "@/components/ui/card";
+import { useZoho } from "@/providers/zoho-provider";
+import { useAgreementRequestStatus } from "@/repo/purchase-agreement/useAgreementRequestStatus";
+import { useDocumentsStore } from "@/store/useDocumentsStore";
+import { format } from "date-fns";
+import { AnimatePresence, motion } from "framer-motion";
+import DocumentStatusTracker, { type DocumentStatus } from "./document-status";
+
+export default function SignedDocumentDisplay({}: {}) {
+  const { dataProvider } = useZoho();
+  const { requestId } = useDocumentsStore();
+
+  const { data } = useAgreementRequestStatus({
+    dataProvider,
+    requestId,
+  });
+
+  if (!data) return <></>;
+
+  return (
+    <section className="flex min-h-[calc(100vh-4em)] flex-1 flex-col bg-gray-100 p-6">
+      <div className="flex flex-1 justify-center">
+        <Card className="w-full max-w-4xl rounded-md bg-white p-4 shadow-lg">
+          <div>
+            <div className="text-lg font-medium">{data.request_name}</div>
+
+            <div className="grid grid-cols-[1fr_200px]">
+              <div className="mt-4 space-y-2">
+                {[
+                  [
+                    "Payment Requested",
+                    data.actions?.some((v) => v.has_payment) ? "Yes" : "No",
+                  ],
+                  [
+                    "Submitted At",
+                    data.sign_submitted_time
+                      ? format(data.sign_submitted_time, "PP pp")
+                      : "",
+                  ],
+                  [
+                    "Completed At",
+                    data.request_status == "completed" && data.action_time
+                      ? format(data.action_time, "PP pp")
+                      : "",
+                  ],
+                ]
+                  .filter((v) => !!v[1])
+                  .map((v) => (
+                    <div className="grid grid-cols-[200px_1fr]" key={v[0]}>
+                      <div className="text-sm font-medium">{v[0]}</div>
+                      <div className="text-sm">{v[1]}</div>
+                    </div>
+                  ))}
+              </div>
+
+              <div>
+                {data.request_status == "inprogress" && (
+                  <div className="flex flex-col items-center">
+                    <div>In Progress</div>
+                  </div>
+                )}
+
+                {data.request_status == "completed" && (
+                  <div className="flex flex-col items-center">
+                    <img
+                      src="https://static.zohocdn.com/sign/images/green-doc.6806dd902a148be03b6ad96de183c013.png"
+                      height={64}
+                      width={64}
+                    />
+                    <div>Completed</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-md font-medium text-gray-900">Documents</h4>
+
+            <div className="mt-4 grid grid-cols-5">
+              {data.document_ids?.map((document) => (
+                <div className="w-32">
+                  <div className="mb-2 aspect-[8.5/11] overflow-hidden rounded bg-gray-50 shadow-sm">
+                    <img
+                      src={`data:image/png;base64,${document.image_string}`}
+                      alt={document.document_name}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <p className="text-center text-sm font-medium text-gray-900">
+                    {document.document_name}
+                  </p>
+                  <p className="text-center text-xs text-gray-500">{`${document.total_pages} page${document.total_pages == 1 ? "" : "s"}`}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative">
+            <h4 className="text-md font-medium text-gray-900">Recipients</h4>
+
+            <div className="mt-2 space-y-3">
+              {data.actions?.map((v) => (
+                <DocumentStatusTracker
+                  status={v.action_status as DocumentStatus}
+                  isEmbedded={v.is_embedded}
+                  recipientName={v.recipient_name}
+                  recipientEmail={v.recipient_email}
+                />
+              ))}
+            </div>
+
+            <AnimatePresence mode="sync">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              ></motion.div>
+            </AnimatePresence>
+          </div>
+        </Card>
+      </div>
+    </section>
+  );
+}

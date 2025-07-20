@@ -9,7 +9,7 @@ type DocumentsStore = {
   removeDocument: (type: DocumentName) => void;
   clearDocuments: () => void;
   requestId?: string | null;
-  setRequestId: (requestId?: string) => void;
+  setRequestId: (requestId?: string | null) => void;
 };
 
 export const useDocumentsStore = create<DocumentsStore>((set) => ({

@@ -1,3 +1,4 @@
+import type { SignDocumentStatus } from "@/types/sign";
 import type { ZohoDataProvider } from "@/types/zoho";
 import { useQuery } from "@tanstack/react-query";
 import { invokeConnection } from "..";
@@ -9,11 +10,11 @@ export function useAgreementRequestStatus({
   dataProvider: ZohoDataProvider;
   requestId?: string | null;
 }) {
-  return useQuery<any>({
+  return useQuery({
     enabled: !!requestId,
     queryKey: ["agreementRequestStatus", requestId],
     queryFn: async () => {
-      return invokeConnection({
+      const res = await invokeConnection<SignDocumentStatus>({
         dataProvider,
         params: {
           method: "GET",
@@ -22,6 +23,7 @@ export function useAgreementRequestStatus({
           connection: "zohosign",
         },
       });
+      return res.statusMessage?.requests;
     },
   });
 }
