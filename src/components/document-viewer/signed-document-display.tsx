@@ -4,7 +4,7 @@ import { useAgreementRequestStatus } from "@/repo/purchase-agreement/useAgreemen
 import { useDocumentsStore } from "@/store/useDocumentsStore";
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import DocumentStatusTracker, { type DocumentStatus } from "./document-status";
+import DocumentStatusTracker from "./document-status";
 
 export default function SignedDocumentDisplay({}: {}) {
   const { dataProvider } = useZoho();
@@ -55,8 +55,15 @@ export default function SignedDocumentDisplay({}: {}) {
 
               <div>
                 {data.request_status == "inprogress" && (
-                  <div className="flex flex-col items-center">
-                    <div>In Progress</div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <motion.div
+                      className="h-2 w-2 rounded-full bg-yellow-500"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                    <span>
+                      In Progress ({data.sign_percentage?.toFixed(0)}%)
+                    </span>
                   </div>
                 )}
 
@@ -79,7 +86,7 @@ export default function SignedDocumentDisplay({}: {}) {
 
             <div className="mt-4 grid grid-cols-5">
               {data.document_ids?.map((document) => (
-                <div className="w-32">
+                <div className="w-32" key={document.document_name}>
                   <div className="mb-2 aspect-[8.5/11] overflow-hidden rounded bg-gray-50 shadow-sm">
                     <img
                       src={`data:image/png;base64,${document.image_string}`}
@@ -102,12 +109,7 @@ export default function SignedDocumentDisplay({}: {}) {
 
             <div className="mt-2 space-y-3">
               {data.actions?.map((v) => (
-                <DocumentStatusTracker
-                  status={v.action_status as DocumentStatus}
-                  isEmbedded={v.is_embedded}
-                  recipientName={v.recipient_name}
-                  recipientEmail={v.recipient_email}
-                />
+                <DocumentStatusTracker key={v.action_id} action={v} />
               ))}
             </div>
 

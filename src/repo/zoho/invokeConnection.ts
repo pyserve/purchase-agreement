@@ -22,5 +22,12 @@ export async function invokeConnection<T>({
     throw Error(res.message);
   }
 
+  if (
+    res.details?.statusMessage?.status &&
+    res.details?.statusMessage?.status == "failure"
+  ) {
+    throw Error(res.details.statusMessage.message);
+  }
+
   return res.details;
 }

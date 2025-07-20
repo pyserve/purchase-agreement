@@ -8,12 +8,15 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { sleep } from "@/lib/utils";
 import { useZoho } from "@/providers/zoho-provider";
-import { useSendForSigning } from "@/repo/purchase-agreement/useSendForSigning";
+import { sendPurchaseAgreement } from "@/repo/purchase-agreement/sendPurchaseAgreement";
 import { useDocumentsStore } from "@/store/useDocumentsStore";
 import type { Document } from "@/types/document";
 import type { Lead } from "@/types/lead";
 import type { SalesOrder } from "@/types/sales-order";
+import type { DeliveryMethod } from "@/types/sign";
+import { useMutation } from "@tanstack/react-query";
 import {
   AlertTriangleIcon,
   ArrowLeftIcon,
@@ -27,6 +30,7 @@ import {
   User,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Progress } from "../ui/progress";
 
@@ -54,11 +58,8 @@ export default function ConfirmationModal({
   const [requestDeposit, setRequestDeposit] = useState(
     !salesOrder.Deposit_Paid,
   );
-  const [deliveryMethod, setDeliveryMethod] = useState<"email" | "phone">(
-    "email",
-  );
+  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>("EMAIL");
 
-  const [signUrl, setSignUrl] = useState<string>();
   const [fakeProgress, setFakeProgress] = useState(0);
   const fakeInterval = useRef<any>(null);
 
@@ -66,10 +67,46 @@ export default function ConfirmationModal({
   const customerEmail = lead.Email;
   const customerPhone = lead.Mobile;
 
-  const sendForSigning = useSendForSigning({
-    dataProvider,
-    salesOrderId: salesOrder.id,
-    templates: documentTemplates,
+  const generateAndSign = useMutation({
+    mutationFn: async () => {
+      return await sendPurchaseAgreement({
+        dataProvider,
+        salesOrderId: salesOrder.id,
+        templates: documentTemplates,
+        isEmbeddedSigning,
+        deliveryMethod,
+        requestDeposit,
+        phoneNumber: customerPhone,
+      });
+    },
+    onSuccess: async (res) => {
+      clearInterval(fakeInterval.current);
+      setFakeProgress(100);
+
+      if (isEmbeddedSigning) {
+        toast.success("The purchase agreement will open in a new window.", {
+          duration: 5000,
+        });
+      } else {
+        toast.success(
+          "The agreement has been generated and sent to the customer.",
+          { duration: 5000 },
+        );
+      }
+
+      await sleep(1000);
+
+      onClose();
+      setRequestId(res.request_id);
+
+      if (isEmbeddedSigning) {
+        window.open(res.sign_url, "_blank");
+      }
+    },
+    onError: () => {
+      clearInterval(fakeInterval.current);
+      setFakeProgress(100);
+    },
   });
 
   const triggerFakeProgress = () => {
@@ -88,34 +125,14 @@ export default function ConfirmationModal({
   };
 
   useEffect(() => {
-    sendForSigning.reset();
+    generateAndSign.reset();
     setFakeProgress(0);
   }, [isOpen]);
 
-  useEffect(() => {
-    if (sendForSigning.isSuccess || sendForSigning.isError) {
-      clearInterval(fakeInterval.current);
-      setFakeProgress(100);
-    }
-  }, [sendForSigning.isSuccess, sendForSigning.isError]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      triggerFakeProgress();
-      const res = await sendForSigning.mutateAsync({
-        isEmbeddedSigning,
-        requestDeposit,
-        sendToPhone: deliveryMethod == "phone",
-        phoneNumber: customerPhone,
-      });
-      setSignUrl(res.sign_url);
-      setRequestId(res.request_id);
-
-      if (isEmbeddedSigning) {
-        window.open(res.sign_url, "_blank");
-      }
-    } catch (error) {}
+    triggerFakeProgress();
+    generateAndSign.mutate();
   };
 
   const handleClose = () => {
@@ -173,24 +190,24 @@ export default function ConfirmationModal({
             <div className="space-y-2 pl-6">
               <label
                 className={`flex cursor-pointer touch-none items-center justify-between rounded-lg border-2 p-3 transition-all duration-200 select-none ${
-                  deliveryMethod === "email"
+                  deliveryMethod === "EMAIL"
                     ? "border-blue-500 bg-blue-50"
                     : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                 }`}
-                onClick={() => setDeliveryMethod("email")}
+                onClick={() => setDeliveryMethod("EMAIL")}
               >
                 <div className="flex items-center space-x-3">
                   <Mail
-                    className={`h-4 w-4 ${deliveryMethod === "email" ? "text-blue-600" : "text-gray-500"}`}
+                    className={`h-4 w-4 ${deliveryMethod === "EMAIL" ? "text-blue-600" : "text-gray-500"}`}
                   />
                   <div>
                     <div
-                      className={`text-sm font-medium ${deliveryMethod === "email" ? "text-blue-900" : "text-gray-700"}`}
+                      className={`text-sm font-medium ${deliveryMethod === "EMAIL" ? "text-blue-900" : "text-gray-700"}`}
                     >
                       Email
                     </div>
                     <p
-                      className={`text-xs ${deliveryMethod === "email" ? "text-blue-700" : "text-gray-500"}`}
+                      className={`text-xs ${deliveryMethod === "EMAIL" ? "text-blue-700" : "text-gray-500"}`}
                     >
                       Send via email notification
                     </p>
@@ -198,65 +215,65 @@ export default function ConfirmationModal({
                 </div>
                 <div
                   className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border-2 ${
-                    deliveryMethod === "email"
+                    deliveryMethod === "EMAIL"
                       ? "border-blue-500 bg-blue-500"
                       : "border-gray-300"
                   }`}
                 >
-                  {deliveryMethod === "email" && (
+                  {deliveryMethod === "EMAIL" && (
                     <div className="h-1.5 w-1.5 rounded-full bg-white"></div>
                   )}
                 </div>
                 <input
                   type="radio"
                   name="deliveryMethod"
-                  checked={deliveryMethod === "email"}
-                  onChange={() => setDeliveryMethod("email")}
+                  checked={deliveryMethod === "EMAIL"}
+                  onChange={() => setDeliveryMethod("EMAIL")}
                   className="sr-only"
                 />
               </label>
 
               <label
                 className={`flex cursor-pointer touch-none items-center justify-between rounded-lg border-2 p-3 transition-all duration-200 select-none ${
-                  deliveryMethod === "phone"
+                  deliveryMethod === "EMAIL_SMS"
                     ? "border-blue-500 bg-blue-50"
                     : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                 }`}
-                onClick={() => setDeliveryMethod("phone")}
+                onClick={() => setDeliveryMethod("EMAIL_SMS")}
               >
                 <div className="flex items-center space-x-3">
                   <Phone
-                    className={`h-4 w-4 ${deliveryMethod === "phone" ? "text-blue-600" : "text-gray-500"}`}
+                    className={`h-4 w-4 ${deliveryMethod === "EMAIL_SMS" ? "text-blue-600" : "text-gray-500"}`}
                   />
                   <div>
                     <div
-                      className={`text-sm font-medium ${deliveryMethod === "phone" ? "text-blue-900" : "text-gray-700"}`}
+                      className={`text-sm font-medium ${deliveryMethod === "EMAIL_SMS" ? "text-blue-900" : "text-gray-700"}`}
                     >
-                      SMS
+                      Email and SMS
                     </div>
                     <p
-                      className={`text-xs ${deliveryMethod === "phone" ? "text-blue-700" : "text-gray-500"}`}
+                      className={`text-xs ${deliveryMethod === "EMAIL_SMS" ? "text-blue-700" : "text-gray-500"}`}
                     >
-                      Send via text message
+                      Send via email and text message
                     </p>
                   </div>
                 </div>
                 <div
                   className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border-2 ${
-                    deliveryMethod === "phone"
+                    deliveryMethod === "EMAIL_SMS"
                       ? "border-blue-500 bg-blue-500"
                       : "border-gray-300"
                   }`}
                 >
-                  {deliveryMethod === "phone" && (
+                  {deliveryMethod === "EMAIL_SMS" && (
                     <div className="h-1.5 w-1.5 rounded-full bg-white"></div>
                   )}
                 </div>
                 <input
                   type="radio"
                   name="deliveryMethod"
-                  checked={deliveryMethod === "phone"}
-                  onChange={() => setDeliveryMethod("phone")}
+                  checked={deliveryMethod === "EMAIL_SMS"}
+                  onChange={() => setDeliveryMethod("EMAIL_SMS")}
                   className="sr-only"
                 />
               </label>
@@ -326,26 +343,26 @@ export default function ConfirmationModal({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent
         className="mx-auto max-h-[95vh] w-[95vw] max-w-md overflow-y-auto"
-        onEscapeKeyDown={(e) => sendForSigning.isPending && e.preventDefault()}
+        onEscapeKeyDown={(e) => generateAndSign.isPending && e.preventDefault()}
         onPointerDownOutside={(e) =>
-          sendForSigning.isPending && e.preventDefault()
+          generateAndSign.isPending && e.preventDefault()
         }
-        showCloseButton={!sendForSigning.isPending}
+        showCloseButton={!generateAndSign.isPending}
       >
         <DialogHeader>
-          {!sendForSigning.isIdle && (
+          {!generateAndSign.isIdle && (
             <Button
               size="icon"
               variant="outline"
-              onClick={() => sendForSigning.reset()}
-              disabled={!sendForSigning.isError}
+              onClick={() => generateAndSign.reset()}
+              disabled={!generateAndSign.isError}
               hidden
             >
               <ArrowLeftIcon />
             </Button>
           )}
 
-          {sendForSigning.isSuccess ? (
+          {generateAndSign.isSuccess ? (
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-600">
               <CheckIcon className="h-6 w-6 text-white" />
             </div>
@@ -360,67 +377,58 @@ export default function ConfirmationModal({
           )}
 
           <DialogTitle className="text-center text-lg">
-            {sendForSigning.isSuccess
+            {generateAndSign.isSuccess
               ? "Success"
               : isEmbeddedSigning
                 ? "Start Signing Now"
                 : "Send for Signing"}
           </DialogTitle>
           <DialogDescription className="text-center text-sm">
-            {sendForSigning.isSuccess
-              ? isEmbeddedSigning
-                ? "The agreement has been generated successfully"
-                : "The agreement has been sent successfully"
-              : isEmbeddedSigning
-                ? "The purchase agreement will open in a new window"
-                : "The purchase agreement will be sent to the customer"}
+            {isEmbeddedSigning
+              ? "The purchase agreement will open in a new window"
+              : "The purchase agreement will be sent to the customer"}
           </DialogDescription>
         </DialogHeader>
 
-        {sendForSigning.isIdle ? (
+        {generateAndSign.isIdle ? (
           <div>{renderForm()}</div>
-        ) : sendForSigning.isSuccess ||
-          sendForSigning.isPending ||
-          sendForSigning.isError ? (
+        ) : generateAndSign.isSuccess ||
+          generateAndSign.isPending ||
+          generateAndSign.isError ? (
           <div className="space-y-4 pb-8">
             <div className="mb-4 space-y-4">
-              {sendForSigning.isPending && (
+              {generateAndSign.isPending && (
                 <p className="text-sm">Generating documents. Please wait...</p>
               )}
 
               <Progress
                 value={fakeProgress}
                 indicatorColor={
-                  sendForSigning.isError
+                  generateAndSign.isError
                     ? "bg-red-600"
-                    : sendForSigning.isSuccess
+                    : generateAndSign.isSuccess
                       ? "bg-green-600"
                       : null
                 }
                 indicatorBgColor={
-                  sendForSigning.isError
+                  generateAndSign.isError
                     ? "bg-red-600/10"
-                    : sendForSigning.isSuccess
+                    : generateAndSign.isSuccess
                       ? "bg-green-600/10"
                       : null
                 }
               />
             </div>
 
-            {sendForSigning.isError && (
+            {generateAndSign.isError && (
               <Alert variant="destructive">
                 <AlertTriangleIcon />
                 <AlertTitle>Error</AlertTitle>
 
                 <AlertDescription>
-                  {sendForSigning.error?.message}
+                  {generateAndSign.error?.message}
                 </AlertDescription>
               </Alert>
-            )}
-            {sendForSigning.isSuccess && (
-              <Button className="w-full" variant="outline" onClick={onClose}>
-                View Documents
-              </Button>
             )}
           </div>
         ) : (

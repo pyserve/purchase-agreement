@@ -218,10 +218,6 @@ export default function PurchaseAgreement() {
     >
       <div ref={topElementRef} />
       <TopActionBar
-        isSignedOrSigning={
-          agreementStatus.data?.request_status == "inprogress" ||
-          agreementStatus.data?.request_status == "completed"
-        }
         onRecallClick={() => setIsRecallModalOpen(true)}
         onAddDocumentsClick={() => setIsDocumentsModalOpen(true)}
         onSendForSigningClick={() => setIsSendForSigningModalOpen(true)}
@@ -253,7 +249,6 @@ export default function PurchaseAgreement() {
       <RecallModal
         isOpen={isRecallModalOpen}
         onClose={() => setIsRecallModalOpen(false)}
-        requestId={requestId!}
       />
 
       <DocumentsModal

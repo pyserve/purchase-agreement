@@ -4,6 +4,10 @@
 //
 //   const signDocumentStatus = Convert.toSignDocumentStatus(json);
 
+export type DeliveryMethod = "EMAIL" | "EMAIL_SMS";
+export type RequestStatus = "inprogress" | "completed" | "recalled";
+export type DocumentStatus = "UNOPENED" | "VIEWED" | "SIGNED";
+
 export type SignDocumentStatus = {
   statusMessage?: StatusMessage;
   status?: string;
@@ -17,7 +21,7 @@ export type StatusMessage = {
 };
 
 export type DocumentRequests = {
-  request_status?: "inprogress" | "completed" | "recalled" | string;
+  request_status?: RequestStatus;
   notes?: string;
   attachments?: any[];
   reminder_period?: number;
@@ -50,11 +54,11 @@ export type DocumentRequests = {
   zsdocumentid?: string;
   request_type_id?: string;
   owner_last_name?: string;
-  actions?: Action[];
+  actions?: DocumentAction[];
   attachment_size?: number;
 };
 
-export type Action = {
+export type DocumentAction = {
   verify_recipient?: boolean;
   recipient_countrycode_iso?: string;
   action_type?: string;
@@ -72,8 +76,8 @@ export type Action = {
   cloud_provider_id?: number;
   recipient_name?: string;
   fields?: Field[];
-  delivery_mode?: string;
-  action_status: string;
+  delivery_mode?: DeliveryMethod;
+  action_status?: DocumentStatus;
   is_signing_group?: boolean;
   recipient_countrycode?: string;
 };

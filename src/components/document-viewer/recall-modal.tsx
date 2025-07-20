@@ -8,54 +8,45 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { apiRequest } from "@/lib/api";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useZoho } from "@/providers/zoho-provider";
+import { recallAgreement } from "@/repo/purchase-agreement/recallAgreement";
+import { useDocumentsStore } from "@/store/useDocumentsStore";
+import { useMutation } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 
 interface RecallModalProps {
   isOpen: boolean;
   onClose: () => void;
-  requestId: string;
 }
 
-export default function RecallModal({
-  isOpen,
-  onClose,
-  requestId,
-}: RecallModalProps) {
-  const [reason, setReason] = useState("");
-  const queryClient = useQueryClient();
+export default function RecallModal({ isOpen, onClose }: RecallModalProps) {
+  const { dataProvider } = useZoho();
+  const { requestId, setRequestId } = useDocumentsStore();
 
-  const recallMutation = useMutation({
-    mutationFn: (data: { requestId: string; reason: string }) =>
-      apiRequest("POST", "/api/recall-requests", data),
-    onSuccess: () => {
-      toast.success("Document Recalled", {
-        description:
-          "The document has been recalled successfully. All parties have been notified.",
-      });
-      setReason("");
-      onClose();
-      queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
+  const [reason, setReason] = useState("");
+
+  const recall = useMutation({
+    mutationFn: async (reason: string) => {
+      if (!reason) {
+        throw Error("Reason Required");
+      }
+      return await recallAgreement({ dataProvider, requestId, reason });
     },
-    onError: () => {
-      toast.error("Error", {
-        description: "Failed to recall document. Please try again.",
-      });
+    onSuccess: () => {
+      toast.success("Document has been recalled");
+      setRequestId(null);
+      handleClose();
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reason.trim()) {
-      toast("Reason Required", {
-        description: "Please provide a reason for recalling this document.",
-      });
-      return;
-    }
-    recallMutation.mutate({ requestId, reason: reason.trim() });
+    recall.mutate(reason.trim());
   };
 
   const handleClose = () => {
@@ -96,7 +87,7 @@ export default function RecallModal({
               variant="outline"
               onClick={handleClose}
               className="flex-1"
-              disabled={recallMutation.isPending}
+              disabled={recall.isPending}
             >
               Cancel
             </Button>
@@ -104,9 +95,9 @@ export default function RecallModal({
               type="submit"
               variant="destructive"
               className="flex-1"
-              disabled={recallMutation.isPending}
+              disabled={recall.isPending}
             >
-              {recallMutation.isPending ? "Recalling..." : "Recall Document"}
+              {recall.isPending ? "Recalling..." : "Recall Document"}
             </Button>
           </div>
         </form>

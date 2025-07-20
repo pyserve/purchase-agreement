@@ -3,10 +3,16 @@ import useTimeAgo from "@/hooks/use-time-ago";
 import { useZoho } from "@/providers/zoho-provider";
 import { useAgreementRequestStatus } from "@/repo/purchase-agreement/useAgreementRequestStatus";
 import { useDocumentsStore } from "@/store/useDocumentsStore";
-import { Download, PenTool, Plus, RefreshCw, Send, Undo2 } from "lucide-react";
+import {
+  FilePenIcon,
+  PenTool,
+  Plus,
+  RefreshCw,
+  Send,
+  Undo2,
+} from "lucide-react";
 
 interface TopActionBarProps {
-  isSignedOrSigning: boolean;
   onRecallClick: () => void;
   onAddDocumentsClick: () => void;
   onSendForSigningClick: () => void;
@@ -14,14 +20,13 @@ interface TopActionBarProps {
 }
 
 export default function TopActionBar({
-  isSignedOrSigning,
   onRecallClick,
   onAddDocumentsClick,
   onSendForSigningClick,
   onSignNowClick,
 }: TopActionBarProps) {
   const { dataProvider } = useZoho();
-  const { requestId } = useDocumentsStore();
+  const { requestId, setRequestId } = useDocumentsStore();
 
   const agreementStatus = useAgreementRequestStatus({
     dataProvider,
@@ -42,7 +47,8 @@ export default function TopActionBar({
 
         {/* Right: Action Buttons */}
         <div className="flex items-center space-x-3">
-          {isSignedOrSigning ? (
+          {agreementStatus.data?.request_status == "inprogress" ||
+          agreementStatus.data?.request_status == "completed" ? (
             <>
               {/* Refresh Button */}
 
@@ -61,21 +67,20 @@ export default function TopActionBar({
                 Refresh
               </Button>
 
-              {/* Recall Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onRecallClick}
-                className="border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800"
-              >
-                <Undo2 className="h-4 w-4" />
-                <span>Recall</span>
-              </Button>
+              {/* Recall Button: Cannot recall if document already signed */}
+              {agreementStatus.data.request_status !== "completed" && (
+                <Button variant="destructive" size="sm" onClick={onRecallClick}>
+                  <Undo2 className="h-4 w-4" />
+                  <span>Recall Agreement</span>
+                </Button>
+              )}
 
-              <Button onClick={onSendForSigningClick}>
-                <Download className="h-4 w-4" />
-                Download Documents
-              </Button>
+              {agreementStatus.data.request_status === "completed" && (
+                <Button onClick={() => setRequestId(null)}>
+                  <FilePenIcon />
+                  Send New Agreement
+                </Button>
+              )}
             </>
           ) : (
             <>

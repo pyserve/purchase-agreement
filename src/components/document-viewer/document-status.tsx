@@ -1,28 +1,29 @@
 import { cn } from "@/lib/utils";
+import type { DocumentAction, DocumentStatus } from "@/types/sign";
 import { CheckCircle, Eye, Mail, PenTool } from "lucide-react";
 
-export type DocumentStatus = "UNOPENED" | "VIEWED" | "SIGNED";
-
 interface DocumentStatusTrackerProps {
-  isEmbedded?: boolean;
-  status: DocumentStatus;
-  recipientName?: string;
-  recipientEmail?: string;
+  action: DocumentAction;
+  // status: DocumentStatus;
+  // recipientName?: string;
+  // recipientEmail?: string;
+  // deliveryMethod?: DeliveryMethod;
   className?: string;
 }
 
 export default function DocumentStatusTracker({
-  isEmbedded,
-  status,
-  recipientName,
-  recipientEmail,
+  action,
+  // status,
+  // recipientName,
+  // recipientEmail,
+  // deliveryMethod,
   className = "",
 }: DocumentStatusTrackerProps) {
-  const statusOrder = isEmbedded
+  const statusOrder = action.is_embedded
     ? ["VIEWED", "SIGNED"]
     : ["UNOPENED", "VIEWED", "SIGNED"];
 
-  const statusSteps = isEmbedded
+  const statusSteps = action.is_embedded
     ? [
         {
           key: "VIEWED" as DocumentStatus,
@@ -54,7 +55,9 @@ export default function DocumentStatusTracker({
       ];
 
   const getStepStatus = (stepKey: DocumentStatus) => {
-    const currentIndex = statusOrder.indexOf(status);
+    const currentIndex = action.action_status
+      ? statusOrder.indexOf(action.action_status)
+      : -1;
     const stepIndex = statusOrder.indexOf(stepKey);
 
     if (stepIndex <= currentIndex) {
@@ -69,9 +72,24 @@ export default function DocumentStatusTracker({
     <div className={`rounded-md border p-4 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-base">{recipientName}</p>
-          <p className="text-sm text-gray-500">{recipientEmail}</p>
+        <div className="flex flex-col items-start">
+          <p className="text-base">{action.recipient_name}</p>
+          <p className="text-sm text-gray-500">
+            {[
+              action.recipient_email,
+              `${action.recipient_countrycode}${action.recipient_phonenumber}`,
+            ]
+              .filter((v) => !!v)
+              .join(", ")}
+          </p>
+
+          <p className="mt-1 rounded bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+            {action.is_embedded
+              ? "Embedded Sign"
+              : action.delivery_mode == "EMAIL"
+                ? "Sent to Email"
+                : "Sent to Email and Phone"}
+          </p>
         </div>
 
         {/* Status Steps */}
