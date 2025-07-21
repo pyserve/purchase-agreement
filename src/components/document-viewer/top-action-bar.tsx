@@ -70,7 +70,11 @@ export default function TopActionBar({
 
               {/* Recall Button: Cannot recall if document already signed */}
               {agreementStatus.data.request_status !== "completed" && (
-                <Button variant="destructive" size="sm" onClick={onRecallClick}>
+                <Button
+                  variant="outline"
+                  onClick={onRecallClick}
+                  className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                >
                   <Undo2 className="h-4 w-4" />
                   <span>Recall Agreement</span>
                 </Button>

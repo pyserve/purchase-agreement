@@ -94,7 +94,7 @@ export default function ConfirmationModal({
         );
       }
 
-      await sleep(1000);
+      await sleep(5000);
 
       onClose();
       setRequestId(res.request_id);
