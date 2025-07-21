@@ -1,11 +1,11 @@
 {
   "name": "purchase-agreement",
   "private": true,
-  "version": "0.0.0",
+  "version": "v3.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build --base=./",
     "lint": "eslint .",
     "preview": "vite preview"
   },

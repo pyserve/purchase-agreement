@@ -1,6 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/not-found";
 import PurchaseAgreement from "@/pages/purchase-agreement";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster as HotToaster } from "react-hot-toast";
@@ -12,7 +11,7 @@ function Router() {
   return (
     <Routes>
       <Route path="/" element={<PurchaseAgreement />} />
-      <Route path="*" element={<NotFound />} />
+      <Route path="*" element={<PurchaseAgreement />} />
     </Routes>
   );
 }

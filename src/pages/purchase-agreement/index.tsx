@@ -20,6 +20,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { AlertCircleIcon, Loader2Icon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { version } from "../../../package.json";
 
 function getDocumentList(salesOrder?: SalesOrder) {
   let documents: DocumentName[] = [];
@@ -283,6 +284,10 @@ export default function PurchaseAgreement() {
         isOpen={isSignNowModalOpen}
         onClose={() => setIsSignNowModalOpen(false)}
       />
+
+      <p className="fixed right-1 bottom-1 font-mono text-xs text-gray-400">
+        {version}
+      </p>
     </motion.div>
   );
 }

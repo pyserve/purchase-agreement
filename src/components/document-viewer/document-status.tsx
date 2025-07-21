@@ -4,19 +4,11 @@ import { CheckCircle, Eye, Mail, PenTool } from "lucide-react";
 
 interface DocumentStatusTrackerProps {
   action: DocumentAction;
-  // status: DocumentStatus;
-  // recipientName?: string;
-  // recipientEmail?: string;
-  // deliveryMethod?: DeliveryMethod;
   className?: string;
 }
 
 export default function DocumentStatusTracker({
   action,
-  // status,
-  // recipientName,
-  // recipientEmail,
-  // deliveryMethod,
   className = "",
 }: DocumentStatusTrackerProps) {
   const statusOrder = action.is_embedded
