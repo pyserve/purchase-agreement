@@ -11,6 +11,7 @@ import { getDocumentTemplates } from "@/constants/documents";
 import { useZoho } from "@/providers/zoho-provider";
 import { executeFunction, getRecord, getRelatedRecords } from "@/repo";
 import { useAgreementRequestStatus } from "@/repo/purchase-agreement/useAgreementRequestStatus";
+import { useDataStore } from "@/store/useDataStore";
 import { useDocumentsStore } from "@/store/useDocumentsStore";
 import type { Document, DocumentName } from "@/types/document";
 import type { Lead } from "@/types/lead";
@@ -57,6 +58,7 @@ export default function PurchaseAgreement() {
 
   const { documents, setDocuments, requestId, setRequestId } =
     useDocumentsStore();
+  const { setLead, setSalesOrder } = useDataStore();
 
   const topElementRef = useRef<HTMLDivElement>(null);
 
@@ -156,9 +158,16 @@ export default function PurchaseAgreement() {
   );
 
   useEffect(() => {
-    setRequestId(salesOrderDetails.data?.Sign_Document_ID);
-    // setRequestId("284096000002083089");
-    // setRequestId("284096000002081537");
+    if (leadDetails.data) {
+      setLead(leadDetails.data);
+    }
+  }, [leadDetails.data]);
+
+  useEffect(() => {
+    if (salesOrderDetails.data) {
+      setSalesOrder(salesOrderDetails.data);
+      setRequestId(salesOrderDetails.data.Sign_Document_ID);
+    }
   }, [salesOrderDetails.data]);
 
   useEffect(() => {

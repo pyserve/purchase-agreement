@@ -18,8 +18,16 @@ export async function invokeConnection<T>({
     Trigger: triggers,
   });
 
+  if (typeof res == "string") {
+    return res as T;
+  }
+
   if (res.code != "SUCCESS") {
     throw Error(res.message);
+  }
+
+  if (res.details?.status && res.details?.status == "false") {
+    throw Error(res.details?.statusMessage);
   }
 
   if (

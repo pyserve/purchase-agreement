@@ -4,6 +4,7 @@ import { useAgreementRequestStatus } from "@/repo/purchase-agreement/useAgreemen
 import { useDocumentsStore } from "@/store/useDocumentsStore";
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
+import DocumentPreview from "./document-preview";
 import DocumentStatusTracker from "./document-status";
 
 export default function SignedDocumentDisplay({}: {}) {
@@ -86,20 +87,7 @@ export default function SignedDocumentDisplay({}: {}) {
 
             <div className="mt-4 grid grid-cols-5">
               {data.document_ids?.map((document) => (
-                <div className="w-32" key={document.document_name}>
-                  <div className="mb-2 aspect-[8.5/11] overflow-hidden rounded bg-gray-50 shadow-sm">
-                    <img
-                      src={`data:image/png;base64,${document.image_string}`}
-                      alt={document.document_name}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                  <p className="text-center text-sm font-medium text-gray-900">
-                    {document.document_name}
-                  </p>
-                  <p className="text-center text-xs text-gray-500">{`${document.total_pages} page${document.total_pages == 1 ? "" : "s"}`}</p>
-                </div>
+                <DocumentPreview key={document.document_id} doc={document} />
               ))}
             </div>
           </div>

@@ -11,6 +11,7 @@ import {
   Send,
   Undo2,
 } from "lucide-react";
+import { DownloadDocumentButton } from "./download-documents";
 
 interface TopActionBarProps {
   onRecallClick: () => void;
@@ -81,6 +82,8 @@ export default function TopActionBar({
                   Send New Agreement
                 </Button>
               )}
+
+              <DownloadDocumentButton />
             </>
           ) : (
             <>
