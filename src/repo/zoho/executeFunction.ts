@@ -10,7 +10,7 @@ export async function executeFunction<T>({
   });
 
   if (res.code !== "success") {
-    throw new Error(res.message);
+    throw new Error(res.message?.replace("Custom exception -", "")?.trim());
   }
 
   try {

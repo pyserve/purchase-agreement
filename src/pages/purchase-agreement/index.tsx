@@ -71,6 +71,11 @@ export default function PurchaseAgreement() {
           dataProvider,
           params: { module: "Leads", id },
         });
+      } else if (module == "Deals") {
+        return await getRecord<Lead>({
+          dataProvider,
+          params: { module: "Deals", id },
+        });
       }
 
       throw new Error(`Unsupported module: ${module}`);
@@ -92,6 +97,14 @@ export default function PurchaseAgreement() {
             new Date(b.Created_Time).getTime() -
             new Date(a.Created_Time).getTime(),
         )[0];
+      } else if (module == "Deals") {
+        const salesOrderId = leadDetails.data?.Sales_Order?.id;
+        if (!salesOrderId) throw new Error(`Sales Order not found`);
+
+        return await getRecord<SalesOrder>({
+          dataProvider,
+          params: { module: "Sales_Orders", id: salesOrderId },
+        });
       }
 
       throw new Error(`Unsupported module: ${module}`);
@@ -167,6 +180,11 @@ export default function PurchaseAgreement() {
   useEffect(() => {
     if (salesOrderDetails.data) {
       setSalesOrder(salesOrderDetails.data);
+      if (salesOrderDetails.data.Sign_Document_ID) {
+        setRequestId(
+          salesOrderDetails.data.Sign_Document_ID.split(",")[0]?.trim(),
+        );
+      }
       setRequestId(salesOrderDetails.data.Sign_Document_ID);
     }
   }, [salesOrderDetails.data]);

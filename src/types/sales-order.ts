@@ -39,7 +39,7 @@ export type SalesOrder = {
   Amortization?: string;
   Est_Installation_Date?: null;
   Purchase_Agreement_Sent?: string;
-  Sign_Document_ID?: null;
+  Sign_Document_ID?: string;
   Terms_and_Conditions?: null;
   Parts_Warranty?: null;
   Sub_Total?: number;

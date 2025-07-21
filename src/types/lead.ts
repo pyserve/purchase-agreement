@@ -247,6 +247,7 @@ export type Lead = {
   Total_Costs_After_Rebate_2?: null;
   Dealer?: Dealer;
   Cold_Hot_Spots?: null;
+  Sales_Order?: RelatedModule;
 };
 
 export type Approval = {
@@ -274,6 +275,11 @@ export type ReviewProcess = {
 
 export type CxProfile = {
   module?: string;
+  name?: string;
+  id?: string;
+};
+
+export type RelatedModule = {
   name?: string;
   id?: string;
 };

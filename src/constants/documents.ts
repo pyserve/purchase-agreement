@@ -22,7 +22,7 @@ const TEMPLATE_CONFIG: TemplateConfig[] = [
     thumbnails: {
       "Weaver Eco Home": "./weh.png",
       "Canadian Choice Home Services": "./cchs.png",
-      "Canadian Eco Home": "/weh.png",
+      "Canadian Eco Home": "/cchs.png",
     },
   },
   {
