@@ -17,6 +17,8 @@ export default function SignedDocumentDisplay({}: {}) {
     requestId,
   });
 
+  const isEmbedded = data?.actions?.some((v) => v.is_embedded);
+
   if (!data) return <></>;
 
   return (
@@ -121,7 +123,7 @@ export default function SignedDocumentDisplay({}: {}) {
 
       <div></div>
 
-      {data.request_status == "inprogress" && (
+      {data.request_status == "inprogress" && !isEmbedded && (
         <div className="fixed top-[5rem] right-6 w-[15em]">
           <SendReminderCard />
         </div>

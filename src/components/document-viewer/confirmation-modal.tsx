@@ -21,6 +21,7 @@ import {
   AlertTriangleIcon,
   ArrowLeftIcon,
   CheckIcon,
+  ExternalLinkIcon,
   Mail,
   MessageCircle,
   PenTool,
@@ -69,7 +70,7 @@ export default function ConfirmationModal({
 
   const generateAndSign = useMutation({
     mutationFn: async () => {
-      return await sendPurchaseAgreement({
+      const res = await sendPurchaseAgreement({
         dataProvider,
         salesOrderId: salesOrder.id,
         templates: documentTemplates,
@@ -78,29 +79,30 @@ export default function ConfirmationModal({
         requestDeposit,
         phoneNumber: customerPhone,
       });
+      if (isEmbeddedSigning && !res.sign_url) {
+        throw new Error("No url provided for embedded signing");
+      }
+      setFakeProgress(100);
+      await sleep(800);
+      return res;
     },
     onSuccess: async (res) => {
       clearInterval(fakeInterval.current);
-      setFakeProgress(100);
 
       if (isEmbeddedSigning) {
         toast.success("The purchase agreement will open in a new window.", {
           duration: 5000,
         });
+        // For embedded signing, the user has to close the button
+        // Request id will be set when the dialog is closed (since setting the value triggers status api)
       } else {
         toast.success(
           "The agreement has been generated and sent to the customer.",
           { duration: 5000 },
         );
-      }
-
-      await sleep(5000);
-
-      onClose();
-      setRequestId(res.request_id);
-
-      if (isEmbeddedSigning) {
-        window.open(res.sign_url, "_blank");
+        // Close the dialog once the agreement has been sent
+        onClose();
+        setRequestId(res.request_id);
       }
     },
     onError: () => {
@@ -124,6 +126,11 @@ export default function ConfirmationModal({
     }, 2500);
   };
 
+  const openUrl = (url: string) => {
+    // For embedded signing, the link should be displayed for the agents to click on
+    window.open(url, "_blank");
+  };
+
   useEffect(() => {
     generateAndSign.reset();
     setFakeProgress(0);
@@ -137,6 +144,7 @@ export default function ConfirmationModal({
 
   const handleClose = () => {
     onClose();
+    setRequestId(generateAndSign.data?.request_id);
   };
 
   const renderForm = () => {
@@ -378,14 +386,18 @@ export default function ConfirmationModal({
 
           <DialogTitle className="text-center text-lg">
             {generateAndSign.isSuccess
-              ? "Success"
+              ? isEmbeddedSigning
+                ? "Agreement Generated"
+                : "Success"
               : isEmbeddedSigning
                 ? "Start Signing Now"
                 : "Send for Signing"}
           </DialogTitle>
           <DialogDescription className="text-center text-sm">
             {isEmbeddedSigning
-              ? "The purchase agreement will open in a new window"
+              ? generateAndSign.isPending
+                ? ""
+                : "Please click the link to open the agreement"
               : "The purchase agreement will be sent to the customer"}
           </DialogDescription>
         </DialogHeader>
@@ -401,24 +413,37 @@ export default function ConfirmationModal({
                 <p className="text-sm">Generating documents. Please wait...</p>
               )}
 
-              <Progress
-                value={fakeProgress}
-                indicatorColor={
-                  generateAndSign.isError
-                    ? "bg-red-600"
-                    : generateAndSign.isSuccess
-                      ? "bg-green-600"
-                      : null
-                }
-                indicatorBgColor={
-                  generateAndSign.isError
-                    ? "bg-red-600/10"
-                    : generateAndSign.isSuccess
-                      ? "bg-green-600/10"
-                      : null
-                }
-              />
+              {(generateAndSign.isPending || generateAndSign.isError) && (
+                <Progress
+                  value={fakeProgress}
+                  indicatorColor={generateAndSign.isError ? "bg-red-600" : null}
+                  indicatorBgColor={
+                    generateAndSign.isError ? "bg-red-600/10" : null
+                  }
+                />
+              )}
             </div>
+
+            {generateAndSign.isSuccess && isEmbeddedSigning && (
+              <div className="mt-6 flex flex-col space-y-3">
+                <Button
+                  type="submit"
+                  className="min-h-[44px] flex-1 bg-green-600 text-white hover:bg-green-700"
+                  onClick={() => openUrl(generateAndSign.data.sign_url ?? "")}
+                >
+                  <ExternalLinkIcon className="h-4 w-4" />
+                  Open Agreement
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                  className="min-h-[44px] flex-1"
+                >
+                  Close
+                </Button>
+              </div>
+            )}
 
             {generateAndSign.isError && (
               <Alert variant="destructive">
