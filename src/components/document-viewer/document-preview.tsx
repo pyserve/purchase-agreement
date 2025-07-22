@@ -55,14 +55,16 @@ export default function DocumentPreview({ doc }: { doc: DocumentID }) {
       </p>
       <p className="text-center text-xs text-gray-500">{`${doc.total_pages} page${doc.total_pages == 1 ? "" : "s"}`}</p>
 
-      <div className="absolute top-1 right-1 opacity-0 transition-all group-hover:opacity-100">
-        <Button
-          size="icon"
-          variant="outline"
-          onClick={() => downloadMutation.mutate()}
-        >
-          <DownloadIcon />
-        </Button>
+      <div className="absolute top-1 right-1 transition-all group-hover:opacity-100 md:opacity-0">
+        {dataProvider == "zoho" && (
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => downloadMutation.mutate()}
+          >
+            <DownloadIcon />
+          </Button>
+        )}
       </div>
     </div>
   );

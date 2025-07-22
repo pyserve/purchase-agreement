@@ -22,7 +22,7 @@ export default function SignedDocumentDisplay({}: {}) {
   if (!data) return <></>;
 
   return (
-    <section className="relative grid min-h-[calc(100vh-4em)] w-full grid-cols-[15rem_1fr_15rem] items-start gap-6 bg-gray-100 p-4">
+    <section className="relative grid min-h-[calc(100vh-4em)] w-full grid-cols-1 items-start gap-6 bg-gray-100 p-4 md:grid-cols-[15rem_1fr_15rem]">
       <div></div>
       <div className="flex flex-1 flex-col">
         <div className="flex flex-1 justify-center">
@@ -30,8 +30,8 @@ export default function SignedDocumentDisplay({}: {}) {
             <div>
               <div className="text-lg font-medium">{data.request_name}</div>
 
-              <div className="grid grid-cols-[1fr_200px]">
-                <div className="mt-4 space-y-2">
+              <div className="grid md:grid-cols-[1fr_200px]">
+                <div className="order-1 mt-4 space-y-2 md:order-2">
                   {[
                     [
                       "Payment Requested",
@@ -59,7 +59,7 @@ export default function SignedDocumentDisplay({}: {}) {
                     ))}
                 </div>
 
-                <div>
+                <div className="mt-4 md:mt-0">
                   {data.request_status == "inprogress" && (
                     <div className="flex flex-col items-center">
                       <div className="flex items-center justify-center space-x-2">
@@ -92,7 +92,7 @@ export default function SignedDocumentDisplay({}: {}) {
             <div>
               <h4 className="text-md font-medium text-gray-900">Documents</h4>
 
-              <div className="mt-4 grid grid-cols-5">
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-5">
                 {data.document_ids?.map((document) => (
                   <DocumentPreview key={document.document_id} doc={document} />
                 ))}
@@ -121,10 +121,10 @@ export default function SignedDocumentDisplay({}: {}) {
         </div>
       </div>
 
-      <div></div>
+      <div className="hidden md:block"></div>
 
       {data.request_status == "inprogress" && !isEmbedded && (
-        <div className="fixed top-[5rem] right-6 w-[15em]">
+        <div className="order-0 md:fixed md:top-[5rem] md:right-6 md:w-[15em]">
           <SendReminderCard />
         </div>
       )}

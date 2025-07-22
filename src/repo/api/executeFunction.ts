@@ -8,8 +8,6 @@ export async function executeFunction<T>({
   name: string;
   params: Record<string, any>;
 }): Promise<T> {
-  console.log("🚀 ~ params:", params);
-
   const req: Record<string, string> = {};
   Object.entries(params).forEach(([key, value]) => {
     if (typeof value === "object") {

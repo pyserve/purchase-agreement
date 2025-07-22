@@ -28,7 +28,6 @@ export async function getRelatedRecords<T>({
   if (!output || !output.data || output.data.length == 0) {
     throw Error("Details not found");
   }
-  console.log("🚀 ~ res: record get", module, output.data);
 
   return output.data;
 }

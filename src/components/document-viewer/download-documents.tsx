@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useZoho } from "@/providers/zoho-provider";
 import { invokeConnection } from "@/repo";
 import { useDataStore } from "@/store/useDataStore";
@@ -11,6 +12,7 @@ export function DownloadDocumentButton() {
   const { dataProvider } = useZoho();
   const { requestId } = useDocumentsStore();
   const { lead } = useDataStore();
+  const isMobile = useIsMobile();
 
   const downloadDocuments = useMutation({
     mutationFn: async () => {
@@ -51,7 +53,7 @@ export function DownloadDocumentButton() {
       ) : (
         <DownloadIcon className="h-4 w-4" />
       )}
-      Download Documents
+      {isMobile ? "Download" : "Download Documents"}
     </Button>
   );
 }

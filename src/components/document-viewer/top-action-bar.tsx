@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import useTimeAgo from "@/hooks/use-time-ago";
 import { useZoho } from "@/providers/zoho-provider";
 import { useAgreementRequestStatus } from "@/repo/purchase-agreement/useAgreementRequestStatus";
@@ -34,14 +35,16 @@ export default function TopActionBar({
     requestId,
   });
 
+  const isMobile = useIsMobile();
+
   const timeAgo = useTimeAgo(agreementStatus.dataUpdatedAt);
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center border-b border-gray-200 bg-white px-6">
-      <div className="flex w-full items-center justify-between">
+    <header className="sticky top-0 z-10 flex h-24 items-center overflow-hidden border-b border-gray-200 bg-white px-2 md:h-16 md:px-6">
+      <div className="flex w-full flex-col items-center justify-between gap-2 md:flex-row">
         {/* Left: Title and Status */}
-        <div className="flex items-center space-x-4">
-          <h1 className="text-xl font-semibold text-gray-900">
+        <div className="flex w-full items-center space-x-4">
+          <h1 className="w-full text-center text-xl font-semibold text-gray-900 md:text-left">
             Preview and Send Agreement
           </h1>
         </div>
@@ -53,7 +56,7 @@ export default function TopActionBar({
             <>
               {/* Refresh Button */}
 
-              <div className="text-muted-foreground text-sm">
+              <div className="text-muted-foreground text-xs md:text-sm">
                 Last Updated: {timeAgo.data}
               </div>
               <Button
@@ -76,7 +79,7 @@ export default function TopActionBar({
                   className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                 >
                   <Undo2 className="h-4 w-4" />
-                  <span>Recall Agreement</span>
+                  {isMobile ? "Recall" : "Recall Agreement"}
                 </Button>
               )}
 
@@ -87,19 +90,19 @@ export default function TopActionBar({
                 </Button>
               )}
 
-              <DownloadDocumentButton />
+              {dataProvider == "zoho" && <DownloadDocumentButton />}
             </>
           ) : (
             <>
               {/* Add Documents Button */}
               <Button variant="outline" onClick={onAddDocumentsClick}>
                 <Plus className="h-4 w-4" />
-                Add Documents
+                {isMobile ? "Add" : "Add Documents"}
               </Button>
 
               {/* Primary Action Buttons */}
               <Button onClick={onSendForSigningClick}>
-                <Send className="h-4 w-4" />
+                <Send className="hidden h-4 w-4 sm:block" />
                 Send for Signing
               </Button>
 
@@ -107,7 +110,7 @@ export default function TopActionBar({
                 onClick={onSignNowClick}
                 className="bg-green-600 text-white hover:bg-green-700"
               >
-                <PenTool className="h-4 w-4" />
+                <PenTool className="hidden h-4 w-4 sm:block" />
                 Start Signing Now
               </Button>
             </>

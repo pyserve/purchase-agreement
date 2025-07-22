@@ -63,8 +63,8 @@ export default function DocumentStatusTracker({
   return (
     <div className={`rounded-md border p-4 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col items-start">
+      <div className="flex flex-col items-center justify-between md:flex-row">
+        <div className="mb-4 flex flex-col items-start md:mb-0">
           <p className="text-base">{action.recipient_name}</p>
           <p className="text-sm text-gray-500">
             {[

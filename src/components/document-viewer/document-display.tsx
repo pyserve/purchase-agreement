@@ -67,12 +67,12 @@ export default function DocumentDisplay({
 
   return (
     <section
-      className="flex min-h-[calc(100vh-4em)] flex-1 flex-col bg-gray-100 p-6"
+      className="flex min-h-[calc(100vh-4em)] flex-1 flex-col bg-gray-100 p-0 md:p-6"
       ref={containerRef}
     >
       {/* Single Image Display */}
       <div className="flex flex-1 justify-center">
-        <Card className="w-full max-w-4xl overflow-hidden rounded-md bg-white p-0 shadow-lg">
+        <Card className="w-full max-w-4xl overflow-hidden rounded-none bg-white p-0 shadow-lg md:rounded-md">
           <div className="relative">
             <AnimatePresence mode="sync">
               {documentDetails.isFetching && (

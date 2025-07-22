@@ -16,7 +16,7 @@ export default function ThumbnailSidebar({
   onDocumentSelect,
 }: ThumbnailSidebarProps) {
   return (
-    <aside className="sticky top-16 flex h-[calc(100vh-4em)] w-32 flex-col border-r border-gray-200 bg-white md:w-48">
+    <aside className="sticky top-24 flex h-[calc(100vh-4em)] w-32 flex-col border-r border-gray-200 bg-white md:top-16 md:w-48">
       <div className="border-b border-gray-200 p-4">
         <h2 className="text-lg font-semibold text-gray-900">Documents</h2>
         <p className="text-sm text-gray-500">
