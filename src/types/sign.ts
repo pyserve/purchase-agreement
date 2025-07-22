@@ -9,11 +9,6 @@ export type RequestStatus = "inprogress" | "completed" | "recalled";
 export type DocumentStatus = "UNOPENED" | "VIEWED" | "SIGNED";
 
 export type SignDocumentStatus = {
-  statusMessage?: StatusMessage;
-  status?: string;
-};
-
-export type StatusMessage = {
   code?: number;
   requests?: DocumentRequests;
   message?: string;

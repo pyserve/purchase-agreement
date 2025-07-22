@@ -13,7 +13,7 @@ export async function getRecord<T>({
     url: `https://www.zohoapis.com/crm/v2.1/${module}/${id}`,
   });
 
-  if (!res?.data || res.data.length == 0) {
+  if (!res || !res.data || res.data.length == 0) {
     throw Error("Details not found");
   }
 

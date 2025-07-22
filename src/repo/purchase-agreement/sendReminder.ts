@@ -14,7 +14,7 @@ export async function sendReminder({
       method: "POST",
       url: `https://sign.zoho.com/api/v1/requests/${requestId}/remind`,
       parameters: {},
-      connection: "zsign",
+      connection: "zohosign",
     },
   });
 }

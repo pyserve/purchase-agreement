@@ -1,11 +1,10 @@
 import type { ZohoModule, ZohoRelatedModule } from "@/types/zoho";
+import { invokeConnection } from "./invokeConnection";
 
 export async function getRelatedRecords<T>({
   module,
   relatedModule,
   id,
-  page = 1,
-  size = 200,
 }: {
   module: ZohoModule;
   id: string;
@@ -13,16 +12,13 @@ export async function getRelatedRecords<T>({
   page?: number;
   size?: number;
 }): Promise<T[]> {
-  const res = await window.ZOHO.CRM.API.getRelatedRecords({
-    Entity: module,
-    RecordID: id,
-    RelatedList: relatedModule,
-    page: page,
-    per_page: size,
+  const res = await invokeConnection<{ data: T[] }>({
+    method: "GET",
+    url: `https://www.zohoapis.com/crm/v2.1/${module}/${id}/${relatedModule}`,
   });
 
-  if (res.data.length == 0) {
-    throw Error("Details not found");
+  if (!res.data || res.data.length == 0) {
+    throw Error(`Details not found for ${module} & ${relatedModule}`);
   }
 
   return res.data;

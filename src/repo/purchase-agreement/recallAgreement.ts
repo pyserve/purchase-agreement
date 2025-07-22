@@ -16,7 +16,7 @@ export async function recallAgreement({
       method: "POST",
       url: `https://sign.zoho.com/api/v1/requests/${requestId}/recall?reason=${reason}`,
       parameters: {},
-      connection: "zsign",
+      connection: "zohosign",
     },
   });
 }

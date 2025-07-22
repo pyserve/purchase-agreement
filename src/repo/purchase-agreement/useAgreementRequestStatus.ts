@@ -23,7 +23,12 @@ export function useAgreementRequestStatus({
           connection: "zohosign",
         },
       });
-      return res.statusMessage?.requests;
+
+      if (res.status !== "success") {
+        throw new Error("Agreement: Error fetching status");
+      }
+
+      return res.requests;
     },
   });
 }

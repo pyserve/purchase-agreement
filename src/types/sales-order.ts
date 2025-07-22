@@ -5,13 +5,13 @@
 //   const salesOrder = Convert.toSalesOrder(json);
 
 import type { Dealer } from "./dealer";
-import type { DocumentName } from "./document";
 
 export type SalesOrder = {
   Owner?: CreatedBy;
   $field_states?: null;
+  $sharing_permission?: string;
   Total_Oversold?: number;
-  Lead_Quote?: LeadQuote;
+  Lead_Quote?: ContactName;
   $state?: string;
   $process_flow?: boolean;
   Currency?: string;
@@ -20,22 +20,22 @@ export type SalesOrder = {
   Status?: string;
   Monthly_Payment_After_Deferral?: null;
   $approval?: Approval;
-  Rebate_Types?: DocumentName[];
+  Rebate_Types?: any[];
+  Total1?: number;
   Created_Time: string;
-  Payment_Method?: string;
+  Payment_Method?: null;
   Pay_Full_Options?: null;
   Deposit_Paid?: boolean;
   Road_Trip?: string;
   Total_Retail_Price?: number;
-  $status?: string;
   Created_By?: CreatedBy;
   Security_Deposit_Required?: null;
-  Description?: null;
+  Description?: string;
   Discount?: number;
   $review_process?: ReviewProcess;
   Agent_Promotional_Discount?: null;
   Manufacture_Rebate_Amount?: null;
-  Financeit_Program_Name?: string;
+  Financeit_Program_Name?: null;
   Amortization?: string;
   Est_Installation_Date?: null;
   Purchase_Agreement_Sent?: string;
@@ -44,7 +44,7 @@ export type SalesOrder = {
   Parts_Warranty?: null;
   Sub_Total?: number;
   $orchestration?: boolean;
-  Contact_Name?: Name;
+  Contact_Name?: ContactName;
   Financeit_Cost?: number;
   Package_Discount_Applied?: boolean;
   Layout?: Layout;
@@ -57,14 +57,15 @@ export type SalesOrder = {
   sign_url?: null;
   Minimum_Terms?: null;
   Monthly_Payment?: number;
+  TOTAL_PAYMENT?: number;
   $currency_symbol?: string;
   Deferral_Time?: string;
   Interest_Rate?: string;
   Tax?: number;
   Energy_Audit?: string;
-  Last_Activity_Time?: string;
+  Last_Activity_Time?: Date;
   $converted?: boolean;
-  Deal_Name?: Name;
+  Deal_Name?: null;
   Exchange_Rate?: number;
   $locked_for_me?: boolean;
   Total_Distance_Cost?: number;
@@ -74,23 +75,24 @@ export type SalesOrder = {
   Warranty?: string;
   Term_Months?: string;
   Old_Equipment?: string;
-  Energy_Audit_Type?: DocumentName[];
+  Energy_Audit_Type?: any[];
+  $wizard_connection_path?: null;
   $editable?: boolean;
-  Product_Details?: ProductDetail[];
   Eligible_Package_Discount?: null;
-  Financeit_Program?: null;
+  Balance?: number;
+  Financeit_Program?: number;
   Agent_Discount_Applied?: boolean;
   Discount1?: number;
   $layout_id?: Layout;
-  Est_Installation_Date2?: string;
+  Est_Installation_Date2?: null;
   Total_Terms?: null;
-  Financing_Program?: string;
+  Financing_Program?: null;
   Government_Loan_Required?: string;
   Modified_By?: CreatedBy;
   $review?: null;
-  Financeit_Terms?: string;
   Sales_Commission?: null;
-  Modified_Time?: string;
+  Modified_Time?: Date;
+  Security_Deposit?: number;
   Subject?: string;
   Sub_Total1?: null;
   Eligible_Pay_Upfront_Discount?: null;
@@ -99,14 +101,13 @@ export type SalesOrder = {
   $in_merge?: boolean;
   Total?: number;
   Extras_Retail_Cost?: number;
-  Est_Installation_Datetime?: string;
+  Est_Installation_Datetime?: null;
   CX_ID?: string;
   $approval_state?: string;
   Wizard?: null;
   Financing_Company?: string;
   Sales_Type?: string;
   Dealer?: Dealer;
-  $has_more?: HasMore;
 };
 
 export type Approval = {
@@ -114,12 +115,7 @@ export type Approval = {
   takeover?: boolean;
   approve?: boolean;
   reject?: boolean;
-  recall?: boolean;
   resubmit?: boolean;
-};
-
-export type HasMore = {
-  Financeit_Terms?: boolean;
 };
 
 export type Layout = {
@@ -141,7 +137,7 @@ export type ReviewProcess = {
   resubmit?: boolean;
 };
 
-export type Name = {
+export type ContactName = {
   name?: string;
   id?: string;
 };
@@ -150,36 +146,6 @@ export type CreatedBy = {
   name?: string;
   id?: string;
   email?: string;
-};
-
-export type LeadQuote = {
-  module?: string;
-  name?: string;
-  id?: string;
-};
-
-export type ProductDetail = {
-  product?: Product;
-  quantity?: number;
-  Discount?: number;
-  total_after_discount?: number;
-  net_total?: number;
-  book?: null;
-  Tax?: number;
-  list_price?: number;
-  unit_price?: number | null;
-  quantity_in_stock?: number;
-  total?: number;
-  id?: string;
-  product_description?: null;
-  line_tax?: any[];
-};
-
-export type Product = {
-  Product_Code?: string;
-  Currency?: string;
-  name?: string;
-  id?: string;
 };
 
 // Converts JSON strings to/from your types

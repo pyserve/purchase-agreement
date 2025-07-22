@@ -1,13 +1,13 @@
 export async function invokeConnection<T>({
   method = "GET",
   url,
-  parameters,
+  parameters = {},
   connection = "crmoauth",
   triggers = ["workflow", "automation"],
 }: {
   method: string;
   url: string;
-  parameters: Record<any, any>;
+  parameters?: Record<any, any>;
   connection?: string;
   triggers?: ("workflow" | "automation")[];
 }): Promise<T> {
@@ -37,5 +37,5 @@ export async function invokeConnection<T>({
     throw Error(res.details.statusMessage.message);
   }
 
-  return res.details;
+  return res.details.statusMessage;
 }

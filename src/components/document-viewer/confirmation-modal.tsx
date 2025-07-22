@@ -57,7 +57,7 @@ export default function ConfirmationModal({
   const { setRequestId } = useDocumentsStore();
 
   const [requestDeposit, setRequestDeposit] = useState(
-    !salesOrder.Deposit_Paid,
+    salesOrder.Security_Deposit ? !salesOrder.Deposit_Paid : false,
   );
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>("EMAIL");
 
@@ -90,9 +90,12 @@ export default function ConfirmationModal({
       clearInterval(fakeInterval.current);
 
       if (isEmbeddedSigning) {
-        toast.success("The purchase agreement will open in a new window.", {
-          duration: 5000,
-        });
+        toast.success(
+          "The purchase agreement has been generated. Please click to open the agreement.",
+          {
+            duration: 5000,
+          },
+        );
         // For embedded signing, the user has to close the button
         // Request id will be set when the dialog is closed (since setting the value triggers status api)
       } else {
@@ -300,7 +303,8 @@ export default function ConfirmationModal({
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1">
                 <label className="text-sm font-medium text-gray-700">
-                  Request security deposit
+                  Request security deposit ($
+                  {salesOrder.Security_Deposit ?? "0"})
                 </label>
                 <p className="text-xs text-gray-500">
                   Turn off if deposit is paid or not needed at signing
@@ -309,6 +313,7 @@ export default function ConfirmationModal({
               <Switch
                 checked={requestDeposit}
                 onCheckedChange={setRequestDeposit}
+                disabled={!salesOrder.Security_Deposit}
                 className="flex-shrink-0"
               />
             </div>

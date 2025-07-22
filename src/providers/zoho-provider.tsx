@@ -35,10 +35,25 @@ export const ZohoProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     (async () => {
-      if (searchParams.get("module") && searchParams.get("id")) {
-        setModule(searchParams.get("module") as ZohoModule);
-        setId(searchParams.get("id") as string);
-        setDataProvider("api");
+      const q = searchParams.get("q");
+
+      if (q) {
+        // Decode from base64
+        try {
+          const decoded = atob(q);
+          const params = new URLSearchParams(decoded);
+          const module = params.get("module");
+          const id = params.get("id");
+          setModule(module as ZohoModule);
+          setId(id as string);
+          setDataProvider("api");
+        } catch (e) {
+          console.log("Invalid Query ");
+          // Handle invalid base64
+          setModule(undefined);
+          setId(undefined);
+          setDataProvider(undefined);
+        }
       } else if (window.ZOHO) {
         await initZoho();
       }

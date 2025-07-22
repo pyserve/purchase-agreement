@@ -59,7 +59,7 @@ export default function PurchaseAgreement() {
 
   const { documents, setDocuments, requestId, setRequestId } =
     useDocumentsStore();
-  const { setLead, setSalesOrder } = useDataStore();
+  const { lead, salesOrder, setLead, setSalesOrder } = useDataStore();
 
   const topElementRef = useRef<HTMLDivElement>(null);
 
@@ -237,6 +237,8 @@ export default function PurchaseAgreement() {
       </div>
     );
   }
+
+  if (!lead || !salesOrder) return <></>;
 
   return (
     <motion.div

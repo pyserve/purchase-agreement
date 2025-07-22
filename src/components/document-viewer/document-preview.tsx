@@ -21,7 +21,7 @@ export default function DocumentPreview({ doc }: { doc: DocumentID }) {
           method: "GET",
           url: `https://sign.zoho.com/api/v1/requests/${requestId}/documents/${doc.document_id}/pdf`,
           parameters: {},
-          connection: "zsign",
+          connection: "zohosign",
         },
       });
 

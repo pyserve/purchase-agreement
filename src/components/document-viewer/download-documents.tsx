@@ -20,7 +20,7 @@ export function DownloadDocumentButton() {
           method: "GET",
           url: `https://sign.zoho.com/api/v1/requests/${requestId}/pdf?with_coc=true`,
           parameters: {},
-          connection: "zsign",
+          connection: "zohosign",
         },
       });
     },
