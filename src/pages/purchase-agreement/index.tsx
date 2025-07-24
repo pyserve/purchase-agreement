@@ -305,9 +305,7 @@ export default function PurchaseAgreement() {
         onClose={() => setIsSignNowModalOpen(false)}
       />
 
-      <p className="fixed right-1 bottom-1 font-mono text-xs text-gray-400">
-        {version}
-      </p>
+      <p className="p-1 font-mono text-xs text-gray-400">{version}</p>
     </motion.div>
   );
 }

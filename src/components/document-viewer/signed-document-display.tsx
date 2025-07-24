@@ -31,7 +31,7 @@ export default function SignedDocumentDisplay({}: {}) {
               <div className="text-lg font-medium">{data.request_name}</div>
 
               <div className="grid md:grid-cols-[1fr_200px]">
-                <div className="order-1 mt-4 space-y-2 md:order-2">
+                <div className="order-1 mt-4 space-y-2 md:order-none">
                   {[
                     [
                       "Payment Requested",
