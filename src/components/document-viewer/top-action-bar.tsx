@@ -43,7 +43,7 @@ export default function TopActionBar({
     <header className="sticky top-0 z-10 flex h-24 items-center overflow-hidden border-b border-gray-200 bg-white px-2 md:h-16 md:px-6">
       <div className="flex w-full flex-col items-center justify-between gap-2 md:flex-row">
         {/* Left: Title and Status */}
-        <div className="flex w-full items-center space-x-4">
+        <div className="flex flex-1 items-center space-x-4">
           <h1 className="w-full text-center text-xl font-semibold text-gray-900 md:text-left">
             Preview and Send Agreement
           </h1>
