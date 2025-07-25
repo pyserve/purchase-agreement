@@ -60,8 +60,18 @@ export function invokeConnection<T>({
   if (dataProvider === "zoho") {
     return zohoRepo.invokeConnection<T>(params);
   } else if (dataProvider === "api") {
-    return apiRepo.invokeConnection<T>(params);
+    return apiRepo.invokeConnectionV2<T>(params);
+  } else if (dataProvider === "api_v2") {
+    return apiRepo.invokeConnectionV2<T>(params);
   }
 
   throw new Error(`Unsupported data provider: ${dataProvider}`);
+}
+
+export function downloadAttachment<T>({
+  params,
+}: {
+  params: Parameters<typeof apiRepo.downloadAttachment>[0];
+}) {
+  return apiRepo.downloadAttachment<T>(params);
 }

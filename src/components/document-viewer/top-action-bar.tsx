@@ -90,7 +90,7 @@ export default function TopActionBar({
                 </Button>
               )}
 
-              {dataProvider == "zoho" && <DownloadDocumentButton />}
+              <DownloadDocumentButton />
             </>
           ) : (
             <>

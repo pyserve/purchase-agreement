@@ -1,5 +1,4 @@
-import { useZoho } from "@/providers/zoho-provider";
-import { invokeConnection } from "@/repo";
+import { downloadAttachment } from "@/repo";
 import { useDataStore } from "@/store/useDataStore";
 import { useDocumentsStore } from "@/store/useDocumentsStore";
 import type { DocumentID } from "@/types/sign";
@@ -9,33 +8,18 @@ import toast from "react-hot-toast";
 import { Button } from "../ui/button";
 
 export default function DocumentPreview({ doc }: { doc: DocumentID }) {
-  const { dataProvider } = useZoho();
   const { requestId } = useDocumentsStore();
   const { lead } = useDataStore();
 
   const downloadMutation = useMutation({
     mutationFn: async () => {
-      const res = await invokeConnection<string>({
-        dataProvider,
+      await downloadAttachment({
         params: {
           method: "GET",
           url: `https://sign.zoho.com/api/v1/requests/${requestId}/documents/${doc.document_id}/pdf`,
-          parameters: {},
-          connection: "zohosign",
+          filename: `Purchase Agreement - ${lead?.CX_Profile?.name ?? ""} ${doc.document_name ?? ""}.pdf`,
         },
       });
-
-      const url = window.URL.createObjectURL(new Blob([res]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute(
-        "download",
-        `Purchase Agreement - ${lead?.CX_Profile?.name ?? ""} ${doc.document_name ?? ""}.pdf`,
-      );
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(url);
     },
     onError: (error) => toast.error(error?.message || "Download failed"),
   });
@@ -56,15 +40,13 @@ export default function DocumentPreview({ doc }: { doc: DocumentID }) {
       <p className="text-center text-xs text-gray-500">{`${doc.total_pages} page${doc.total_pages == 1 ? "" : "s"}`}</p>
 
       <div className="absolute top-1 right-1 transition-all group-hover:opacity-100 md:opacity-0">
-        {dataProvider == "zoho" && (
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() => downloadMutation.mutate()}
-          >
-            <DownloadIcon />
-          </Button>
-        )}
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={() => downloadMutation.mutate()}
+        >
+          <DownloadIcon />
+        </Button>
       </div>
     </div>
   );
