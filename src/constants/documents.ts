@@ -1,7 +1,7 @@
 import type { Dealer } from "@/types/dealer";
 import type { Document, DocumentName } from "@/types/document";
 
-type ModuleType = "Leads" | "Sales_Orders";
+type ModuleType = "Leads" | "Sales_Orders" | "Tickets";
 
 type TemplateConfig = {
   name: DocumentName;
@@ -31,6 +31,7 @@ const TEMPLATE_CONFIG: TemplateConfig[] = [
     templateNames: {
       "Weaver Eco Home": "warranty",
       "Canadian Choice Home Services": "warranty",
+      "Canadian Eco Home": "warranty",
     },
   },
   {
@@ -39,14 +40,17 @@ const TEMPLATE_CONFIG: TemplateConfig[] = [
     templateNames: {
       "Weaver Eco Home": "New_CCHS_OERP_Form",
       "Canadian Choice Home Services": "New_CCHS_OERP_Form",
+      "Canadian Eco Home": "New_CCHS_OERP_Form",
     },
   },
   {
     name: "H.R.S.P",
     module: "Leads",
     templateNames: {
-      "Weaver Eco Home": "",
-      "Canadian Choice Home Services": "",
+      // "Weaver Eco Home": "HRS_HeatPump_Contractor Terms and Conditions",
+      // "Canadian Choice Home Services":
+      //   "HRS_HeatPump_Contractor Terms and Conditions",
+      // "Canadian Eco Home": "HRS_HeatPump_Contractor Terms and Conditions",
     },
   },
   {
@@ -56,6 +60,7 @@ const TEMPLATE_CONFIG: TemplateConfig[] = [
       "Weaver Eco Home": "",
       "Canadian Choice Home Services":
         "New_CCHS Canada Greener Home Consent Form",
+      "Canadian Eco Home": "CEH Canada Greener Home Consent Form",
     },
   },
   {
@@ -68,10 +73,12 @@ const TEMPLATE_CONFIG: TemplateConfig[] = [
   },
   {
     name: "In-House Rebate",
-    module: "Leads",
+    module: "Tickets",
     templateNames: {
-      "Weaver Eco Home": "",
-      "Canadian Choice Home Services": "",
+      // "Weaver Eco Home": "Mutual Release Agreement - In House Rebate",
+      // "Canadian Choice Home Services":
+      //   "Mutual Release Agreement - In House Rebate",
+      // "Canadian Eco Home": "Mutual Release Agreement - In House Rebate",
     },
   },
   {
@@ -80,6 +87,7 @@ const TEMPLATE_CONFIG: TemplateConfig[] = [
     templateNames: {
       "Weaver Eco Home": "Audit Form",
       "Canadian Choice Home Services": "New_CCHS Energy Audit Release Form",
+      "Canadian Eco Home": "CEH Energy Audit Release Form",
     },
   },
   {
@@ -88,6 +96,7 @@ const TEMPLATE_CONFIG: TemplateConfig[] = [
     templateNames: {
       "Weaver Eco Home": "Heat Pump Participant Agreement",
       "Canadian Choice Home Services": "Heat Pump Participant Agreement",
+      "Canadian Eco Home": "Heat Pump Participant Agreement",
     },
   },
   {
@@ -96,7 +105,8 @@ const TEMPLATE_CONFIG: TemplateConfig[] = [
     templateNames: {
       "Weaver Eco Home": "",
       "Canadian Choice Home Services":
-        "New_CCHS APPOINTMENT OF AUTHORIZED AGENT TO TERMIN",
+        "New_CCHS APPOINTMENT OF AUTHORIZED AGENT TO T",
+      "Canadian Eco Home": "CEH_APPOINTMENT OF AUTHORIZED AGENT TO TERMIN",
     },
   },
   {
@@ -105,6 +115,7 @@ const TEMPLATE_CONFIG: TemplateConfig[] = [
     templateNames: {
       "Weaver Eco Home": "",
       "Canadian Choice Home Services": "New_CCHS Acknowledgement Form",
+      "Canadian Eco Home": "CEH Acknowledgement Form",
     },
   },
 ];
