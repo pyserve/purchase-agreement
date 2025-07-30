@@ -56,7 +56,7 @@ export default function TopActionBar({
             <>
               {/* Refresh Button */}
 
-              <div className="text-muted-foreground text-xs md:text-sm">
+              <div className="text-muted-foreground hidden text-xs md:block md:text-sm">
                 Last Updated: {timeAgo.data}
               </div>
               <Button

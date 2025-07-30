@@ -1,7 +1,7 @@
 {
   "name": "purchase-agreement",
   "private": true,
-  "version": "v3.0.0",
+  "version": "v3.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
