@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build --base=./",
+    "build": "tsc -b && vite build",
+    "zoho": "tsc -b && vite build --base=./",
     "lint": "eslint .",
     "preview": "vite preview"
   },
